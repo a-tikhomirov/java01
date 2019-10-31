@@ -42,4 +42,13 @@ public class Lesson01HW {
         }
         return a * (b + (c / d));
     }
+
+    //4. Написать метод, принимающий на вход два числа, и проверяющий что их сумма лежит в пределах от 10 до 20(включительно), если да – вернуть true, в противном случае – false;
+    private static boolean sumBetween10and20(int a, int b){
+        return (a + b >= 10) && (a + b <= 20);
+    }
+
+    private static boolean sumBetween10and20(float a, float b){
+        return (a + b >= 10) && (a + b <= 20);
+    }
 }
