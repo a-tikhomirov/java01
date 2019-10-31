@@ -16,7 +16,7 @@ public class Lesson01HW {
         System.out.println(sumBetween10and20(25,5));
         System.out.println(sumBetween10and20(10.5f,9.5f));
         printSign(0);
-        System.out.println(isNegative(-5));
+        System.out.println(isNegative(1));
         sayHello("Иван");
         checkLeapYear(2000);
     }
@@ -36,12 +36,13 @@ public class Lesson01HW {
     }
 
     //3. Написать метод вычисляющий выражение a * (b + (c / d)) и возвращающий результат,где a, b, c, d – входные параметры этого метода;
-    private static int someMath(int a, int b, int c, int d){
+    private static float someMath(int a, int b, int c, int d){ //float вместо int
         if (d == 0){
             System.out.println("Параметр d не должен быть равен нулю");
             return -1;
         }
-        return a * (b + (c / d));
+        //return a * (b + (c / d));
+        return a * (b + (c * 1f / d));
     }
 
     private static float someMath(float a, float b, float c, float d){
@@ -54,11 +55,13 @@ public class Lesson01HW {
 
     //4. Написать метод, принимающий на вход два числа, и проверяющий что их сумма лежит в пределах от 10 до 20(включительно), если да – вернуть true, в противном случае – false;
     private static boolean sumBetween10and20(int a, int b){
-        return (a + b >= 10) && (a + b <= 20);
+        int sum = a + b;    //для скоращения расчетов в return
+        return (sum >= 10) && (sum <= 20);
     }
 
     private static boolean sumBetween10and20(float a, float b){
-        return (a + b >= 10) && (a + b <= 20);
+        float sum = a + b;    //для скоращения расчетов в return
+        return (sum >= 10) && (sum <= 20);
     }
 
     //5. Написать метод, которому в качестве параметра передается целое число, метод должен напечатать в консоль положительное ли число передали, или отрицательное; Замечание: ноль считаем положительным числом.
