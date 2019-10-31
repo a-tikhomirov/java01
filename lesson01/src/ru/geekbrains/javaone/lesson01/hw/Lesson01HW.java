@@ -16,7 +16,7 @@ public class Lesson01HW {
         System.out.println(sumBetween10and20(25,5));
         System.out.println(sumBetween10and20(10.5f,9.5f));
         printSign(0);
-        System.out.println(isPositive(-5));
+        System.out.println(isNegative(-5));
         sayHello("Иван");
         checkLeapYear(2000);
     }
@@ -67,8 +67,8 @@ public class Lesson01HW {
     }
 
     //6. Написать метод, которому в качестве параметра передается целое число, метод должен вернуть true, если число отрицательное;
-    private static boolean isPositive(int a){
-        return a > 0;
+    private static boolean isNegative(int a){
+        return a < 0;
     }
 
     //7. Написать метод, которому в качестве параметра передается строка, обозначающая имя, метод должен вывести в консоль сообщение «Привет, указанное_имя!»;
