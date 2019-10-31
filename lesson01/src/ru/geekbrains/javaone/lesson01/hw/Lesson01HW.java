@@ -9,7 +9,7 @@ public class Lesson01HW {
 
     //1. Создать пустой проект в IntelliJ IDEA и прописать метод main();
     public static void main(String[] args) {
-        
+
     }
 
     //2. Создать переменные всех пройденных типов данных, и инициализировать их значения;
@@ -24,5 +24,22 @@ public class Lesson01HW {
         boolean bool = true;
         String str = "Hello, World!";
         System.out.println("byte b = " + b + ";\nshort s = " + s + ";\nint i = " + i + ";\nlong l = " + l + ";\nfloat f = " + f + ";\ndouble d = " + d + ";\nchar c = " + c + ";\nboolean bool = " + bool + ";\nString str = " + str);
+    }
+
+    //3. Написать метод вычисляющий выражение a * (b + (c / d)) и возвращающий результат,где a, b, c, d – входные параметры этого метода;
+    private static int someMath(int a, int b, int c, int d){
+        if (d == 0){
+            System.out.println("Параметр d не должен быть равен нулю");
+            return -1;
+        }
+        return a * (b + (c / d));
+    }
+
+    private static float someMath(float a, float b, float c, float d){
+        if (d == 0){
+            System.out.println("Параметр d не должен быть равен нулю");
+            return -1;
+        }
+        return a * (b + (c / d));
     }
 }
