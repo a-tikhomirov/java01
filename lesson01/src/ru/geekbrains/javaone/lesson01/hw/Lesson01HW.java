@@ -6,7 +6,9 @@ package ru.geekbrains.javaone.lesson01.hw;
  * @version 1.0
  */
 public class Lesson01HW {
+
+    //1. Создать пустой проект в IntelliJ IDEA и прописать метод main();
     public static void main(String[] args) {
-        
+
     }
 }
