@@ -1,4 +1,5 @@
 package ru.geekbrains.javaone.lesson01.hw;
+
 /**
  * A program that contains Java 1 lesson 1 Home Work
  *
@@ -9,7 +10,15 @@ public class Lesson01HW {
 
     //1. Создать пустой проект в IntelliJ IDEA и прописать метод main();
     public static void main(String[] args) {
-
+        variables();
+        System.out.println(someMath(10,20,40,20));
+        System.out.println(someMath(10,20,(float)50,2));
+        System.out.println(sumBetween10and20(25,5));
+        System.out.println(sumBetween10and20(10.5f,9.5f));
+        printSign(0);
+        System.out.println(isPositive(-5));
+        sayHello("Иван");
+        checkLeapYear(2000);
     }
 
     //2. Создать переменные всех пройденных типов данных, и инициализировать их значения;
@@ -77,5 +86,5 @@ public class Lesson01HW {
         boolean isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 
         System.out.println("Год " + year + (isLeap ? " " : " не ") + "является високосным");
-    } 
+    }
 }
