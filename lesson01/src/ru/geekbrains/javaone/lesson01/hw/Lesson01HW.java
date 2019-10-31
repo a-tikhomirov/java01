@@ -56,4 +56,9 @@ public class Lesson01HW {
     private static void printSign(int a){
         System.out.println("Переданноее число является " + ((a >= 0) ? "положительным" : "отрицательным"));
     }
+
+    //6. Написать метод, которому в качестве параметра передается целое число, метод должен вернуть true, если число отрицательное;
+    private static boolean isPositive(int a){
+        return a > 0;
+    }
 }
