@@ -1,6 +1,6 @@
 package ru.geekbrains.javaone.lesson02.hw;
 
-import java.util.Arrays;
+import java.util.Arrays;    //для преобразования массива в строку
 
 /**
  * A program that contains Java 1 lesson 2 Home Work
@@ -62,10 +62,17 @@ public class Lesson02HW {
         System.out.println("Сгенерированный массив:\n" + Arrays.toString(arrToMul));
         System.out.println("Заданный массив " + (checkBalance(arrToMul) ? "сбалансированный" : "несбалансированный") + "\n");
 
-        arrToMul = getRandomArray(12,1,20);
-        System.out.println("Сгенерированный массив:\n" + Arrays.toString(arrToMul));
-        shiftArrWithTmp(arrToMul, -2);
-        System.out.println("Массив со сдвигом на -2 элемента:\n" + Arrays.toString(arrToMul));
+        arr = getRandomArray(10,1,10);
+        System.out.println("Сгенерированный массив:\n" + Arrays.toString(arr));
+        int n = -3;
+        shiftArrWithTmp(arr, n);
+        System.out.println("Массив со сдвигом на " + n + ":\n" + Arrays.toString(arr) + "\n");
+
+        arr = getRandomArray(10,1,10);
+        System.out.println("Сгенерированный массив:\n" + Arrays.toString(arr));
+        n = 11;
+        shiftArr(arr, n);
+        System.out.println("Массив со сдвигом на " + n + ":\n" + Arrays.toString(arr));
     }
 
     /*
@@ -294,4 +301,39 @@ public class Lesson02HW {
         for (int i = 0; i < len; i++)
             arr[i] = tmpArr[i];
     }
+
+    /*
+    *   8. Метод циклически смещает все элементы заданного массива
+    *   на n позиций без использования вспомогательного массива
+    *
+    *   @param  arr целочисленный одномерный массив
+    *   @param  n   число на которое будут сдвинуты элементы массива
+     */
+    private static void shiftArr(int[] arr, int n){
+        int len = arr.length;
+        int shiftCount = Math.abs(n) % len;
+        for (int i = 0; i < shiftCount; i++) shiftOnce(arr, (n < 0));
+    }
+
+    /*
+    *   Метод осуществляет циклический сдвиг элементов
+    *   массива на 1 элемент влево или вправо
+    *
+    *   @param  arr целочисленный одномерный массив
+    *   @param  left    если true - сдвиг влево, если false - вправо
+     */
+    private static void shiftOnce(int[] arr, boolean left){
+        int len = arr.length;
+        int tmp;
+        if (left){
+            tmp = arr[0];
+            for (int i = 0; i < (len - 1); i++) arr[i] = arr[i + 1];
+            arr[len - 1] = tmp;
+        } else {
+            tmp = arr[len - 1];
+            for (int i = (len - 1); i > 0; i--) arr[i] = arr[i - 1];
+            arr[0] = tmp;
+        }
+    }
+
 }
