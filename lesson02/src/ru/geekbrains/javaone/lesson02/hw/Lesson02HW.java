@@ -20,6 +20,14 @@ public class Lesson02HW {
 
         int[] arrAsc = new int[8];
         System.out.println("Массив возрастающих значений:\n" + Arrays.toString(getAscArray(arrAsc)) + "\n");
+
+        int[] arrToMul = {1, 5, 3, 2, 11, 4, 5, 2, 4, 8, 9, 1};
+        System.out.println("Заданный массив:\n" + Arrays.toString(arrToMul));
+        System.out.println("Числа меньше 6 умножены на 2:\n" + Arrays.toString(changeArrMul(arrToMul)) + "\n");
+
+        arrToMul = getRandomArray(12,1,15);
+        System.out.println("Случайный массив:\n" + Arrays.toString(arrToMul));
+        System.out.println("Числа меньше 6 умножены на 2:\n" + Arrays.toString(changeArrMul(arrToMul)) + "\n");
     }
 
     /*
@@ -31,7 +39,7 @@ public class Lesson02HW {
      */
     private static int[] getRandomArray(int len, int min, int max){
         int[] arr = new int[len];
-        max++;
+        max = max - min + 1;
         for (int i = 0; i < len; i++){
             arr[i] = (int) (Math.random() * max) + min;
         }
@@ -70,6 +78,19 @@ public class Lesson02HW {
         arr[0] = 1;
         for (int i = 1; i < len; i++){
             arr[i] = arr[i - 1] + 3;
+        }
+        return arr;
+    }
+
+    /*
+    *   3. Метод, принимающий на вход массив и умножающий числа меньше 6 на 2;
+    *
+    *   @param  arr массив для обработки
+     */
+    private static int[] changeArrMul(int[] arr){
+        int len = arr.length;
+        for (int i = 0; i < len; i++){
+            arr[i] = (arr[i] < 6) ? arr[i] * 2 : arr[i];
         }
         return arr;
     }
