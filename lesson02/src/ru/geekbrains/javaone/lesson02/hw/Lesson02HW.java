@@ -246,13 +246,17 @@ public class Lesson02HW {
     private static boolean checkBalance(int[] arr){
         int len = arr.length;
         int leftSum, rightSum;
-        for (int i = 0; i < len; i++){
-            leftSum = getArrSum(arr, 0, i);
-            rightSum = getArrSum(arr, i, (len - i));
+        leftSum = arr[0];
+        rightSum = getArrSum(arr, 1, (len - 1));
+        for (int i = 1; i < len; i++){
+            //leftSum = getArrSum(arr, 0, i);
+            //rightSum = getArrSum(arr, i, (len - i));
             if (leftSum == rightSum){
                 System.out.println("Balance point = " + i + ";\nBalance summ = " + leftSum + ";");
                 return true;
             }
+            leftSum += arr[i];
+            rightSum -= arr[i];
         }
         return false;
     }
