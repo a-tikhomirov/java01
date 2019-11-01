@@ -61,6 +61,11 @@ public class Lesson02HW {
         arrToMul = getRandomArray(12,1,15);
         System.out.println("Сгенерированный массив:\n" + Arrays.toString(arrToMul));
         System.out.println("Заданный массив " + (checkBalance(arrToMul) ? "сбалансированный" : "несбалансированный") + "\n");
+
+        arrToMul = getRandomArray(12,1,20);
+        System.out.println("Сгенерированный массив:\n" + Arrays.toString(arrToMul));
+        shiftArrWithTmp(arrToMul, -2);
+        System.out.println("Массив со сдвигом на -2 элемента:\n" + Arrays.toString(arrToMul));
     }
 
     /*
@@ -267,5 +272,26 @@ public class Lesson02HW {
             sum += arr[i];
         }
         return sum;
+    }
+
+    /*
+    *   7. Метод циклически смещает все элементы заданного массива
+    *   на n позиций с использованием вспомогательного массива
+    *
+    *   @param  arr целочисленный одномерный массив
+    *   @param  n   число на которое будут сдвинуты элементы массива
+     */
+    private static void shiftArrWithTmp(int[] arr, int n){
+        int len = arr.length;
+        int[] tmpArr = new int[len];
+        for (int i = 0; i < len; i++){
+            if (n < 0){
+                tmpArr[i] = arr[(i - n) % len];
+            } else {
+                tmpArr[i] = arr[(len - n + i) % len];
+            }
+        }
+        for (int i = 0; i < len; i++)
+            arr[i] = tmpArr[i];
     }
 }
