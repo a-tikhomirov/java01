@@ -43,10 +43,29 @@ public class Lesson02HW {
         System.out.println("Сгенерированный квадратный массив:\n" + toString(sqrArr));
         fillSqrArrWithOne(sqrArr);
         System.out.println("Квадратный массив заполненный единицами по диагонали:\n" + toString(sqrArr) + "\n");
+
+        int[] arrBalanced = {10, 1, 2, 3, 4};
+        System.out.println("Заданный массив:\n" + Arrays.toString(arrBalanced));
+        System.out.println("Заданный массив " + (checkBalance(arrBalanced) ? "сбалансированный" : "несбалансированный") + "\n");
+
+        int[] arrBalanced2 = {1, 1, 1, 2, 1};
+        System.out.println("Заданный массив:\n" + Arrays.toString(arrBalanced2));
+        System.out.println("Заданный массив " + (checkBalance(arrBalanced2) ? "сбалансированный" : "несбалансированный") + "\n");
+
+        /*
+        *   Примеры сгенерированных сбалансированных массивов:
+        *   [14, 5, 5, 2, 14, 15 || 8, 4, 8, 15, 5, 15] 55 || 55
+        *   [14, 7, 12, 6, 2 || 11, 10, 1, 3, 3, 2, 11] 41 || 41
+        *   [5, 14, 2, 4, 1, 15 || 8, 2, 10, 1, 7, 13] 41 || 41
+         */
+        arrToMul = getRandomArray(12,1,15);
+        System.out.println("Сгенерированный массив:\n" + Arrays.toString(arrToMul));
+        System.out.println("Заданный массив " + (checkBalance(arrToMul) ? "сбалансированный" : "несбалансированный") + "\n");
     }
 
     /*
-    *   Метод возвращает целочисленный массив случайных чисел в диапазоне от min до max длины len
+    *   Метод возвращает целочисленный массив
+    *   случайных чисел в диапазоне от min до max длины len
     *
     *   @param  len Длина массива
     *   @param  min Минимальное возможное значение элемента массива
@@ -62,7 +81,8 @@ public class Lesson02HW {
     }
 
     /*
-    *   Метод возвращает целочисленный квадратный массив случайных чисел в диапазоне от min до max размерностью len
+    *   Метод возвращает целочисленный квадратный массив
+    *   случайных чисел в диапазоне от min до max размерностью len
     *
     *   @param  len Размерность массива
     *   @param  min Минимальное возможное значение элемента массива
@@ -79,7 +99,7 @@ public class Lesson02HW {
     /*
     *   Метод возвращает двумерный целочисленный массив в виде строки
     *
-    *   @param arr  Двумерный целочисленный массив для преобразования в строку
+    *   @param arr  Двумерный целочисленный массив
      */
     private static String toString(int[][] arr){
         if (arr == null)
@@ -113,7 +133,7 @@ public class Lesson02HW {
     /*
     *   1. Метод, заменяющий в принятом массиве 0 на 1, 1 на 0;
     *
-    *   @param  arr одномерный целочесленный массив для обработки
+    *   @param  arr одномерный целочисленный массив
      */
     private static void changeArr0to1(int[] arr){
         int len = arr.length;
@@ -132,9 +152,10 @@ public class Lesson02HW {
     }
 
     /*
-    *   2. Метод, который с помощью цикла заполняет массив значениями 1 4 7 10 13 16 19 22;
+    *   2. Метод, который с помощью цикла
+    *   заполняет массив значениями 1 4 7 10 13 16 19 22;
     *
-    *   @param  arr одномерный целочесленный массив для заполнения
+    *   @param  arr одномерный целочисленный массив
      */
     private static void getAscArray(int[] arr){
         int len = arr.length;
@@ -147,7 +168,7 @@ public class Lesson02HW {
     /*
     *   3. Метод, принимающий на вход массив и умножающий числа меньше 6 на 2;
     *
-    *   @param  arr одномерный целочесленный массив для обработки
+    *   @param  arr одномерный целочисленный массив
      */
     private static void changeArrMul(int[] arr){
         int len = arr.length;
@@ -161,7 +182,7 @@ public class Lesson02HW {
     /*
     *   4.1 Метод возвращает минимальное значение одномерного массива
     *
-    *   @param  arr одномерный целочесленный массив для поиска минимального значения
+    *   @param  arr одномерный целочисленный массив
      */
     private static int getMinFromArr(int[] arr){
         int min = arr[0];
@@ -177,7 +198,7 @@ public class Lesson02HW {
     /*
     *   4.2 Метод возвращает максимальное значение одномерного массива
     *
-    *   @param  arr одномерный целочесленный массив для поиска максимального значения
+    *   @param  arr одномерный целочисленный массив
      */
     private static int getMaxFromArr(int[] arr) {
         int max = arr[0];
@@ -191,9 +212,10 @@ public class Lesson02HW {
     }
 
     /*
-    *   5. Метод, который заполняет диагональные элементы квадратного целочисленного массива единицами
+    *   5. Метод, который заполняет диагональные
+    *   элементы квадратного целочисленного массива единицами
     *
-    *   @param  arr квадратный целочесленный массив
+    *   @param  arr квадратный целочисленный массив
      */
     private static void fillSqrArrWithOne(int[][] arr){
         int len = arr.length;
@@ -201,5 +223,49 @@ public class Lesson02HW {
             arr[i][i] = 1;
             arr[len - i - 1][i] = 1;
         }
+    }
+
+    /*
+    *   6. Метод возвращает true если в массиве есть место,
+    *   в котором сумма левой и правой части массива равны.
+    *
+    *   @param  arr одномерный ненулевой целочисленный массив для проверки
+     */
+    private static boolean checkBalance(int[] arr){
+        int len = arr.length;
+        int leftSum, rightSum;
+        for (int i = 0; i < len; i++){
+            leftSum = getArrSum(arr, 0, i);
+            rightSum = getArrSum(arr, i, (len - i));
+            if (leftSum == rightSum){
+                System.out.println("Balance point = " + i + ";\nBalance summ = " + leftSum + ";");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+    *   Метод возвращает сумму заданного числа элементов
+    *   одномерного целочисленного массива начиная с заданной позиции
+    *
+    *   @param  arr целочисленный одномерный массив
+    *   @param  ind индекс элемента, начиная с которого будет считаться сумма
+    *   @param  count   число элементов для суммирования
+     */
+    private static int getArrSum(int[] arr, int ind, int count){
+        if (arr == null){
+            return 0;
+        }
+        int len = arr.length;
+        if (ind + count > len || ind > len || ind < 0 || count < 0){
+            System.out.println("Заданный индекс или число элементов суммирования выходят за границы массива или отрицательны");
+            return 0;
+        }
+        int sum = 0;
+        for (int i = ind; i < (ind + count); i++){
+            sum += arr[i];
+        }
+        return sum;
     }
 }
