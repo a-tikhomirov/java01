@@ -12,11 +12,14 @@ public class Lesson02HW {
     public static void main(String[] args) {
         int[] arr = {1, 1, 0, 0, 1, 0, 1, 1, 0, 0};
         System.out.println("Заданный массив:\n" + Arrays.toString(arr));
-        System.out.println("Замена 0 на 1, 1 на 0:\n" + Arrays.toString(changeArr0to1(arr)));
+        System.out.println("Замена 0 на 1, 1 на 0:\n" + Arrays.toString(changeArr0to1(arr)) + "\n");
 
         arr = getRandomArray(10,0,1);
-        System.out.println("Слйчайный массив:\n" + Arrays.toString(arr));
-        System.out.println("Замена 0 на 1, 1 на 0:\n" + Arrays.toString(changeArr0to1(arr)));
+        System.out.println("Случайный массив:\n" + Arrays.toString(arr));
+        System.out.println("Замена 0 на 1, 1 на 0:\n" + Arrays.toString(changeArr0to1(arr)) + "\n");
+
+        int[] arrAsc = new int[8];
+        System.out.println("Массив возрастающих значений:\n" + Arrays.toString(getAscArray(arrAsc)) + "\n");
     }
 
     /*
@@ -53,6 +56,20 @@ public class Lesson02HW {
                 default:
                     System.out.println("Элемент массива номер " + (i + 1) + " не равен 0 или 1");
             }
+        }
+        return arr;
+    }
+
+    /*
+    *   2. Метод, который с помощью цикла заполняет массив значениями 1 4 7 10 13 16 19 22;
+    *
+    *   @param  arr массив для обработки
+     */
+    private static int[] getAscArray(int[] arr){
+        int len = arr.length;
+        arr[0] = 1;
+        for (int i = 1; i < len; i++){
+            arr[i] = arr[i - 1] + 3;
         }
         return arr;
     }
