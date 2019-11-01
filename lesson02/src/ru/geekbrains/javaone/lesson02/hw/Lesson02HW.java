@@ -28,6 +28,11 @@ public class Lesson02HW {
         arrToMul = getRandomArray(12,1,15);
         System.out.println("Случайный массив:\n" + Arrays.toString(arrToMul));
         System.out.println("Числа меньше 6 умножены на 2:\n" + Arrays.toString(changeArrMul(arrToMul)) + "\n");
+
+        arrToMul = getRandomArray(12,1,20);
+        System.out.println("Случайный массив:\n" + Arrays.toString(arrToMul));
+        System.out.println("Минимальный элемент массива: " + getMinFromArr(arrToMul));
+        System.out.println("Максимальный элемент массива: " + getMaxFromArr(arrToMul) + "\n");
     }
 
     /*
@@ -93,5 +98,37 @@ public class Lesson02HW {
             arr[i] = (arr[i] < 6) ? arr[i] * 2 : arr[i];
         }
         return arr;
+    }
+
+    /*
+    *   4.1 Метод возвращает минимальное значение одномерного массива
+    *
+    *   @param  arr массив для поиска минимального значения
+     */
+    private static int getMinFromArr(int[] arr){
+        int min = arr[0];
+        int len = arr.length;
+        for (int i = 1; i < len; i++){
+            if (arr[i] < min){
+                min = arr[i];
+            }
+        }
+        return min;
+    }
+
+    /*
+    *   4.2 Метод возвращает максимальное значение одномерного массива
+    *
+    *   @param  arr массив для поиска максимального значения
+     */
+    private static int getMaxFromArr(int[] arr) {
+        int max = arr[0];
+        int len = arr.length;
+        for (int i = 1; i < len; i++) {
+            if (arr[i] > max) {
+                max = arr[i];
+            }
+        }
+        return max;
     }
 }
