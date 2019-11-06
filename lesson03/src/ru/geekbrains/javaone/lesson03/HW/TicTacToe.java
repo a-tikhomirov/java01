@@ -1,18 +1,24 @@
 package ru.geekbrains.javaone.lesson03.HW;
 
-import java.util.Random;
-import java.util.Scanner;
+import java.util.Random;    // использвуется для генерации псевдослучайных значений
+import java.util.Scanner;   // используется для считывания пользовательского ввода в консоли
 
 public class TicTacToe {
-    private static char[][] field;
-    private static int fieldSizeX;
-    private static int fieldSizeY;
-    private static final Scanner SCANNER = new Scanner(System.in);
-    private static final Random RANDOM = new Random();
-    private static final char DOT_HUMAN = 'X';
-    private static final char DOT_AI = 'O';
-    private static final char DOT_EMPTY = '.';
+    private static char[][] field;              // поле для игры
+    private static int fieldSizeX;              // размер поля для игры по горизонтали
+    private static int fieldSizeY;              // размер поля для игры по вертикали
+    private static boolean isHumanTurn = true;  // кому принадлежит текущий ход
 
+    private static final Scanner SCANNER = new Scanner(System.in);  // используется для считывания пользовательского ввода в консоли
+    private static final Random RANDOM = new Random();              // используется для генерации псевдослучайных значений
+    private static final char DOT_HUMAN = 'X';  // символ используемый для хода игрока
+    private static final char DOT_AI = 'O';     // символ используемый для хода ИИ
+    private static final char DOT_EMPTY = '.';  // символ обозначающий пустое поле
+
+    /**
+     *  Инициализация игрового поля -
+     *  заполнение поля символами <code>DOT_EMPTY</code>
+      */
     private static void initField() {
         fieldSizeX = 3;
         fieldSizeY = 3;
@@ -23,6 +29,10 @@ public class TicTacToe {
             }
         }
     }
+
+    /**
+    *   Отрисовка игрового поля в консоли
+     */
     private static void showField() {
         for (int i = 0; i < fieldSizeY; i++) {
             System.out.print("|");
@@ -33,32 +43,61 @@ public class TicTacToe {
         }
         System.out.println("-------");
     }
+
+    /**
+    *   Следующий ход, игрок или ИИ
+    *
+    *   @param isHuman  true - ход предлагается игроку,
+    *                   false - ход делает ИИ
+     */
+    private static void nextTurn(boolean isHuman) {
+        if (isHuman) {
+            humanTurn();
+        } else {
+            aiTurn();
+        }
+    }
+
+    /**
+    *   Ход игрока - запрос координат
+     */
     private static void humanTurn() {
         int x;
         int y;
         do {
-            System.out.printf("Введите координаты X и Y (от 1 до %d) через %s>>> ", fieldSizeX, "пробел");
+            System.out.printf("Введите координаты X (от 1 до %d) и Y (от 1 до %d) через пробел>>> ", fieldSizeX, fieldSizeY);
             x = SCANNER.nextInt() - 1;
             y = SCANNER.nextInt() - 1;
-        } while (!isValidCell(x, y) || !isEmptyCell(x, y));
+        } while (!isValidCell(x, y) || !isSymbolInCell(x, y, DOT_EMPTY));
         field[y][x] = DOT_HUMAN;
     }
 
-    private static boolean isValidCell(int x, int y) {
-        return x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY;
-    }
-    private static boolean isEmptyCell(int x, int y) {
-        return field[y][x] == DOT_EMPTY;
-    }
+    /**
+    *   Ход ИИ
+     */
     private static void aiTurn() {
+        aiRandomTurn();
+    }
+    /**
+    *   ИИ делает случайных ход
+     */
+    private static void aiRandomTurn() {
         int x;
         int y;
         do {
             x = RANDOM.nextInt(fieldSizeX);
             y = RANDOM.nextInt(fieldSizeY);
-        } while (!isEmptyCell(x, y));
+        } while (!isSymbolInCell(x, y, DOT_EMPTY));
         field[y][x] = DOT_AI;
     }
+
+    /**
+    *   Проверка на выигрыш
+    *
+    *   @param c   символ для проверки
+    *              DOT_HUMAN - для проверки выигрыша игрока
+    *              DOT_AI - для проверки выигрыша ИИ
+     */
     private static boolean checkWin(char c) {
         if (field[0][0] == c && field[0][1] == c && field[0][2] == c) return true;
         if (field[1][0] == c && field[1][1] == c && field[1][2] == c) return true;
@@ -72,50 +111,57 @@ public class TicTacToe {
         if (field[0][2] == c && field[1][1] == c && field[2][0] == c) return true;
         return false;
     }
+
+    /**
+    *   Проверка на ничью
+     */
     private static boolean isDraw() {
         for (int i = 0; i < fieldSizeY; i++) {
             for (int j = 0; j < fieldSizeX; j++) {
-                if (field[i][j] == DOT_EMPTY)
+                if (isSymbolInCell(i, j, DOT_EMPTY))
                     return false;
             }
         }
         return true;
     }
 
+    /**
+    *   Проверка коррдинат на валидность
+    *
+    *   @param  x   координата по горизонтали
+    *   @param  y   координата по вертикали
+     */
+    private static boolean isValidCell(int x, int y) {
+        return x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY;
+    }
+
+    /**
+    *   Проверка клетки поля на определенный символ или пустое поле
+    *
+    *   @param  x   координата поля по горизонтали
+    *   @param  y   координата поля по вертикали
+    *   @param  symbol   символ для проверки
+     */
+    private static boolean isSymbolInCell(int x, int y, char symbol) {
+        return field[y][x] == symbol;
+    }
+
+    // Точка входа в программу
     public static void main(String[] args) {
         initField();
         showField();
         while (true) {
-            humanTurn();
+            nextTurn(isHumanTurn);
             showField();
-            if (checkWin(DOT_HUMAN)) {
-                System.out.println("Human win!");
+            if (checkWin((isHumanTurn) ? DOT_HUMAN : DOT_AI)) {
+                System.out.printf("%s win!\n", ((isHumanTurn) ? "Human" : "AI"));
                 break;
             }
             if (isDraw()) {
                 System.out.println("Draw!");
                 break;
             }
-            aiTurn();
-            showField();
-            if (checkWin(DOT_AI)) {
-                System.out.println("Computer win!");
-                break;
-            }
-            if (isDraw()) {
-                System.out.println("Draw!");
-                break;
-            }
+            isHumanTurn = !isHumanTurn;
         }
-
     }
-
-    private static void method(String s, Object... b) {
-        b[0] = 1;
-        for (int i = 0; i < b.length; i++) {
-            System.out.print(b[i] + " ");
-        }
-        System.out.println();
-    }
-
 }
