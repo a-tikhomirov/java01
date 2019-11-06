@@ -7,8 +7,10 @@ public class TicTacToe {
     private static char[][] field;              // поле для игры
     private static int fieldSizeX;              // размер поля для игры по горизонтали
     private static int fieldSizeY;              // размер поля для игры по вертикали
+    private static int symbolsToWin;            // число символов подряд для выигрыша
     private static boolean isHumanTurn = true;  // кому принадлежит текущий ход
 
+    private static final int MIN_SIZE = 3;      // минимальный размер поля по вертикали и горизонтали
     private static final Scanner SCANNER = new Scanner(System.in);  // используется для считывания пользовательского ввода в консоли
     private static final Random RANDOM = new Random();              // используется для генерации псевдослучайных значений
     private static final char DOT_HUMAN = 'X';  // символ используемый для хода игрока
@@ -16,12 +18,37 @@ public class TicTacToe {
     private static final char DOT_EMPTY = '.';  // символ обозначающий пустое поле
 
     /**
+     *  Инициализация игровых параметров
+     */
+    private static void initGameParams() {
+        initFieldSize();
+        initSymToWin();
+    }
+    /**
+     *  Инициализация размера поля для игры - запрос ввода
+     */
+    private static void initFieldSize() {
+        do {
+            System.out.printf("Введите размеры поля по X и по Y (не менее %d)>>> ", MIN_SIZE);
+            fieldSizeX = SCANNER.nextInt();
+            fieldSizeY = SCANNER.nextInt();
+        } while ((fieldSizeX < 3) || (fieldSizeY < 3));
+    }
+    /**
+     *  Инициализация числа символов подряд для выигрыша - запрос ввода
+     */
+    private static void initSymToWin() {
+        do {
+            System.out.printf("Введите необходимое для победы число символов идущих подряд (не менее %d и не более %d)>>> ", MIN_SIZE, ((fieldSizeX < fieldSizeY) ? fieldSizeX : fieldSizeY));
+            symbolsToWin = SCANNER.nextInt();
+        } while (!isSymbolsToWinValid(symbolsToWin));
+    }
+
+    /**
      *  Инициализация игрового поля -
      *  заполнение поля символами <code>DOT_EMPTY</code>
-      */
+     */
     private static void initField() {
-        fieldSizeX = 3;
-        fieldSizeY = 3;
         field = new char[fieldSizeY][fieldSizeX];
         for (int i = 0; i < fieldSizeY; i++) {
             for (int j = 0; j < fieldSizeX; j++) {
@@ -31,7 +58,7 @@ public class TicTacToe {
     }
 
     /**
-    *   Отрисовка игрового поля в консоли
+     *   Отрисовка игрового поля в консоли
      */
     private static void showField() {
         for (int i = 0; i < fieldSizeY; i++) {
@@ -45,10 +72,10 @@ public class TicTacToe {
     }
 
     /**
-    *   Следующий ход, игрок или ИИ
-    *
-    *   @param isHuman  true - ход предлагается игроку,
-    *                   false - ход делает ИИ
+     *   Следующий ход, игрок или ИИ
+     *
+     *   @param isHuman  true - ход предлагается игроку,
+     *                   false - ход делает ИИ
      */
     private static void nextTurn(boolean isHuman) {
         if (isHuman) {
@@ -59,7 +86,7 @@ public class TicTacToe {
     }
 
     /**
-    *   Ход игрока - запрос координат
+     *   Ход игрока - запрос координат
      */
     private static void humanTurn() {
         int x;
@@ -73,13 +100,13 @@ public class TicTacToe {
     }
 
     /**
-    *   Ход ИИ
+     *   Ход ИИ
      */
     private static void aiTurn() {
         aiRandomTurn();
     }
     /**
-    *   ИИ делает случайных ход
+     *   ИИ делает случайных ход
      */
     private static void aiRandomTurn() {
         int x;
@@ -92,28 +119,79 @@ public class TicTacToe {
     }
 
     /**
-    *   Проверка на выигрыш
-    *
-    *   @param c   символ для проверки
-    *              DOT_HUMAN - для проверки выигрыша игрока
-    *              DOT_AI - для проверки выигрыша ИИ
+     *  Проверка на выигрыш
+     *
+     *  @param  symbol  символ для проверки
+     *                  DOT_HUMAN - для проверки выигрыша игрока
+     *                  DOT_AI - для проверки выигрыша ИИ
+     *  @return true - выигрышная комбинация была найдена
+     *          false - выигрышная комбинация не была найдена
      */
-    private static boolean checkWin(char c) {
-        if (field[0][0] == c && field[0][1] == c && field[0][2] == c) return true;
-        if (field[1][0] == c && field[1][1] == c && field[1][2] == c) return true;
-        if (field[2][0] == c && field[2][1] == c && field[2][2] == c) return true;
+    private static boolean checkWin(char symbol) {
+        // для проверки выигрыша разобьем игровое поле на квадраты со стороной размером symbolsToWin
+        int sqrX = fieldSizeX - symbolsToWin + 1; // число квадратов по горизонтали
+        int sqrY = fieldSizeY - symbolsToWin + 1; // число квадратов по вертикали
 
-        if (field[0][0] == c && field[1][0] == c && field[2][0] == c) return true;
-        if (field[0][1] == c && field[1][1] == c && field[2][1] == c) return true;
-        if (field[0][2] == c && field[1][2] == c && field[2][2] == c) return true;
-
-        if (field[0][0] == c && field[1][1] == c && field[2][2] == c) return true;
-        if (field[0][2] == c && field[1][1] == c && field[2][0] == c) return true;
+        // проверка всех возможных квадратов поля на выигрышную комбинацию
+        for (int i = 0; i < sqrY; i++) {
+            for (int j = 0; j < sqrX; j++) {
+                if (checkSqr(j, i, symbolsToWin, symbol)) return true;
+            }
+        }
         return false;
     }
 
     /**
-    *   Проверка на ничью
+     *  Проверка квадрата на выигрышную комбинацию
+     *
+     *  @param offsetX  сдвиг координаты X левого верхнего улла квадрата
+     *                  относительно начала поля (от нуля)
+     *  @param offsetY  двиг координаты Y левого верхнего улла квадрата
+     *                  относительно начала поля (от нуля)
+     *  @param sqrSize  размер стороны квадрата
+     *  @param symbol   символ для проверки
+     *  @return true - выигрышная комбинация была найдена
+     *          false - выигрышная комбинация не была найдена
+     */
+    private static boolean checkSqr(int offsetX, int offsetY, int sqrSize, char symbol) {
+        return checkDiags(offsetX, offsetY, symbolsToWin, symbol) || checkLines(offsetX, offsetY, symbolsToWin, symbol);
+    }
+
+    /**
+     *  Проверка диагоналей квадрата на выигрышную комбинацию
+     */
+    private static boolean checkDiags(int offsetX, int offsetY, int sqrSize, char symbol) {
+        boolean diag1 = true;   // инициализация проверки диагонали с левого верхнего угла
+        boolean diag2 = true;   // инициализация проверки диагонали с левого нижнего угла
+        for (int i = 0; i < sqrSize; i++)
+        {
+            diag1 &= isSymbolInCell(i + offsetX, i + offsetY, symbol);
+            diag2 &= isSymbolInCell(sqrSize - i - 1 + offsetX, i + offsetY, symbol);
+            if (!diag1 && !diag2) break;
+        }
+        return diag1 || diag2;
+    }
+
+    /**
+     *  Проверка строк и столбцов квадрата на выигрышную комбинацию
+     */
+    private static boolean checkLines(int offsetX, int offsetY, int sqrSize, char symbol) {
+        boolean col, row;       // переменные, которые хранят проверку столбца, колонки
+        for (int i = 0; i < sqrSize; i++) {
+            col = true;
+            row = true;
+            for (int j = 0; j < sqrSize; j++) {
+                col &= isSymbolInCell(i + offsetX, j + offsetY, symbol);
+                row &= isSymbolInCell(j + offsetX, i + offsetY, symbol);
+                if (!col && !row) break;
+            }
+            if (col || row) return true;
+        }
+        return false;
+    }
+
+    /**
+     *   Проверка на ничью
      */
     private static boolean isDraw() {
         for (int i = 0; i < fieldSizeY; i++) {
@@ -126,21 +204,30 @@ public class TicTacToe {
     }
 
     /**
-    *   Проверка коррдинат на валидность
-    *
-    *   @param  x   координата по горизонтали
-    *   @param  y   координата по вертикали
+     *   Проверка коррдинат на валидность
+     *
+     *   @param  x   координата по горизонтали
+     *   @param  y   координата по вертикали
      */
     private static boolean isValidCell(int x, int y) {
         return x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY;
     }
 
     /**
-    *   Проверка клетки поля на определенный символ или пустое поле
-    *
-    *   @param  x   координата поля по горизонтали
-    *   @param  y   координата поля по вертикали
-    *   @param  symbol   символ для проверки
+     *   Проверка числа символов для выигрыша на валидность
+     *
+     *   @param  symbolsNumber   число символов для выигрыша
+     */
+    private static boolean isSymbolsToWinValid(int symbolsNumber) {
+        return symbolsNumber >= MIN_SIZE && ((fieldSizeX > fieldSizeY) ? (symbolsNumber <= fieldSizeY) : (symbolsNumber <= fieldSizeX));
+    }
+
+    /**
+     *   Проверка клетки поля на определенный символ или пустое поле
+     *
+     *   @param  x   координата поля по горизонтали
+     *   @param  y   координата поля по вертикали
+     *   @param  symbol   символ для проверки
      */
     private static boolean isSymbolInCell(int x, int y, char symbol) {
         return field[y][x] == symbol;
@@ -148,6 +235,7 @@ public class TicTacToe {
 
     // Точка входа в программу
     public static void main(String[] args) {
+        initGameParams();
         initField();
         showField();
         while (true) {
