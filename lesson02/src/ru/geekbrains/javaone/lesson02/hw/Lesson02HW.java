@@ -21,7 +21,7 @@ public class Lesson02HW {
         System.out.println("Замена 0 на 1, 1 на 0:\n" + Arrays.toString(arr) + "\n");
 
         int[] arrAsc = new int[8];
-        getAscArray(arrAsc);
+        getAscArray(arrAsc, 1, 3);
         System.out.println("Массив возрастающих значений:\n" + Arrays.toString(arrAsc) + "\n");
 
         int[] arrToMul = {1, 5, 3, 2, 11, 4, 5, 2, 4, 8, 9, 1};
@@ -148,8 +148,12 @@ public class Lesson02HW {
     *   @param  arr одномерный целочисленный массив
      */
     private static void changeArr0to1(int[] arr){
-        int len = arr.length;
-        for (int i = 0; i < len; i++){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        for (int i = 0; i < arr.length; i++){
+            //arr[i] = (arr[i] == 1) ? 0 : 1;
+            //arr[i] = 1 - arr[i];
+            arr[i] ^= 1;
+            /*
             switch (arr[i]){
                 case 0:
                     arr[i] = 1;
@@ -159,7 +163,7 @@ public class Lesson02HW {
                     break;
                 default:
                     System.out.println("Элемент массива номер " + (i + 1) + " не равен 0 или 1");
-            }
+            }*/
         }
     }
 
@@ -168,13 +172,19 @@ public class Lesson02HW {
     *   заполняет массив значениями 1 4 7 10 13 16 19 22;
     *
     *   @param  arr одномерный целочисленный массив
+    *   @param  shift   сдвиг прогрессии
+    *   @param  step    шаг прогрессии
      */
-    private static void getAscArray(int[] arr){
-        int len = arr.length;
-        arr[0] = 1;
+    private static void getAscArray(int[] arr, int shift, int step){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = i * step + shift;
+        }
+
+        /*arr[0] = 1;
         for (int i = 1; i < len; i++){
             arr[i] = arr[i - 1] + 3;
-        }
+        }*/
     }
 
     /*
@@ -183,8 +193,8 @@ public class Lesson02HW {
     *   @param  arr одномерный целочисленный массив
      */
     private static void changeArrMul(int[] arr){
-        int len = arr.length;
-        for (int i = 0; i < len; i++){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        for (int i = 0; i < arr.length; i++){
             if (arr[i] < 6) {
                 arr[i] *= 2;
             }
@@ -198,8 +208,8 @@ public class Lesson02HW {
      */
     private static int getMinFromArr(int[] arr){
         int min = arr[0];
-        int len = arr.length;
-        for (int i = 1; i < len; i++){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        for (int i = 1; i < arr.length; i++){
             if (arr[i] < min){
                 min = arr[i];
             }
@@ -214,8 +224,8 @@ public class Lesson02HW {
      */
     private static int getMaxFromArr(int[] arr) {
         int max = arr[0];
-        int len = arr.length;
-        for (int i = 1; i < len; i++) {
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        for (int i = 1; i < arr.length; i++) {
             if (arr[i] > max) {
                 max = arr[i];
             }
@@ -230,10 +240,10 @@ public class Lesson02HW {
     *   @param  arr квадратный целочисленный массив
      */
     private static void fillSqrArrWithOne(int[][] arr){
-        int len = arr.length;
-        for (int i = 0; i < len; i++){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        for (int i = 0; i < arr.length; i++){
             arr[i][i] = 1;
-            arr[len - i - 1][i] = 1;
+            arr[arr.length - i - 1][i] = 1; // arr[i][arr.length - i - 1] = 1;
         }
     }
 
@@ -244,11 +254,11 @@ public class Lesson02HW {
     *   @param  arr одномерный ненулевой целочисленный массив для проверки
      */
     private static boolean checkBalance(int[] arr){
-        int len = arr.length;
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
         int leftSum, rightSum;
         leftSum = arr[0];
-        rightSum = getArrSum(arr, 1, (len - 1));
-        for (int i = 1; i < len; i++){
+        rightSum = getArrSum(arr, 1, (arr.length - 1));
+        for (int i = 1; i < arr.length; i++){
             //leftSum = getArrSum(arr, 0, i);
             //rightSum = getArrSum(arr, i, (len - i));
             if (leftSum == rightSum){
@@ -273,8 +283,8 @@ public class Lesson02HW {
         if (arr == null){
             return 0;
         }
-        int len = arr.length;
-        if (ind + count > len || ind > len || ind < 0 || count < 0){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        if (ind + count > arr.length || ind > arr.length || ind < 0 || count < 0){
             System.out.println("Заданный индекс или число элементов суммирования выходят за границы массива или отрицательны");
             return 0;
         }
@@ -293,16 +303,16 @@ public class Lesson02HW {
     *   @param  n   число на которое будут сдвинуты элементы массива
      */
     private static void shiftArrWithTmp(int[] arr, int n){
-        int len = arr.length;
-        int[] tmpArr = new int[len];
-        for (int i = 0; i < len; i++){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        int[] tmpArr = new int[ arr.length];
+        for (int i = 0; i <  arr.length; i++){
             if (n < 0){
-                tmpArr[i] = arr[(i - n) % len];
+                tmpArr[i] = arr[(i - n) %  arr.length];
             } else {
-                tmpArr[i] = arr[(len - n + i) % len];
+                tmpArr[i] = arr[( arr.length - n + i) %  arr.length];
             }
         }
-        for (int i = 0; i < len; i++)
+        for (int i = 0; i <  arr.length; i++)
             arr[i] = tmpArr[i];
     }
 
@@ -311,12 +321,41 @@ public class Lesson02HW {
     *   на n позиций без использования вспомогательного массива
     *
     *   @param  arr целочисленный одномерный массив
-    *   @param  n   число на которое будут сдвинуты элементы массива
+    *   @param  shiftValue   число на которое будут сдвинуты элементы массива
      */
-    private static void shiftArr(int[] arr, int n){
-        int len = arr.length;
-        int shiftCount = Math.abs(n) % len;
-        for (int i = 0; i < shiftCount; i++) shiftOnce(arr, (n < 0));
+    private static void shiftArr(int[] arr, int shiftValue){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        int shiftCount = Math.abs(shiftValue) % arr.length;
+        for (int i = 0; i < shiftCount; i++) shiftOnce(arr, (shiftValue < 0));
+    }
+
+    /*
+     *   Метод осуществляет циклический сдвиг элементов
+     *   массива на 1 элемент влево или вправо
+     *
+     *   @param  arr целочисленный одномерный массив
+     *   @param  left    если true - сдвиг влево, если false - вправо
+     */
+    private static void shiftOnce(int[] arr, boolean left){
+        if (left){
+            shiftLeft(arr);
+        } else {
+            shiftRight(arr);
+        }
+    }
+
+    private static void shiftLeft(int[] arr) {
+        int lastIndex = arr.length - 1;
+        int tmp = arr[0];
+        for (int i = 0; i < (lastIndex - 1); i++) arr[i] = arr[i + 1];
+        arr[lastIndex - 1] = tmp;
+    }
+
+    private static void shiftRight(int[] arr) {
+        int lastIndex = arr.length - 1;
+        int tmp = arr[lastIndex];
+        for (int i = lastIndex; i > 0; i--) arr[i] = arr[i - 1];
+        arr[0] = tmp;
     }
 
     /*
@@ -326,9 +365,23 @@ public class Lesson02HW {
     *   @param  arr целочисленный одномерный массив
     *   @param  left    если true - сдвиг влево, если false - вправо
      */
-    private static void shiftOnce(int[] arr, boolean left){
-        int len = arr.length;
-        int tmp;
+    private static void shiftOnceV1(int[] arr, boolean left){
+        //int len = arr.length; //простое поле, не вычисляется - можно не выделять отдельную переменную
+        int lastIndex = arr.length - 1;
+        int tmp = (left) ? arr[0] : arr[lastIndex];
+        for (int i = 0; i < lastIndex; i++){
+            if (left) {
+                arr[i] = arr[i + 1];
+            } else {
+                arr[lastIndex - i] = arr[lastIndex - i - 1];
+            }
+        }
+        if (left) {
+            arr[lastIndex] = tmp;
+        } else {
+            arr[0] = tmp;
+        }
+        /*
         if (left){
             tmp = arr[0];
             for (int i = 0; i < (len - 1); i++) arr[i] = arr[i + 1];
@@ -337,7 +390,7 @@ public class Lesson02HW {
             tmp = arr[len - 1];
             for (int i = (len - 1); i > 0; i--) arr[i] = arr[i - 1];
             arr[0] = tmp;
-        }
+        }*/
     }
 
 }
