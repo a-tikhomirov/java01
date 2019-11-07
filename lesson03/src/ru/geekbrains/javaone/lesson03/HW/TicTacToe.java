@@ -121,6 +121,8 @@ public class TicTacToe {
 
     /**
      *   Ход ИИ
+     *
+     *  @param difficulty   сложность работы ИИ (от 1 до 3)
      */
     private static void aiTurn(int difficulty) {
         switch (difficulty) {
@@ -151,6 +153,8 @@ public class TicTacToe {
 
     /**
      *  ИИ делает ход по алгоритму минимакс
+     *
+     *  @param  algDepth    глубина работы алгоритма ИИ минимакс
      */
     private static void aiTurnToWin(int algDepth) {
         copyField();
@@ -176,11 +180,12 @@ public class TicTacToe {
      *  Примечание - алгоритм работает не так хорошо, как хотелось бы, т.к. скорее всего
      *  не корректно адаптирован метод расчета веса комбинаций в методе <code>getScore</code>
      *  Однако для поля 4 на 4 может работать лучше чем для поля 3 на 3
+     *  Проверерно на полях различных размеров (в т.ч. не квадратных полях)
      *
      * @param depth     глубина поиска
      * @param symbol    символ для имитации хода
      * @param turnsCount    возможное число ходов
-     * @return  возвращает массив <code>[x, y]</code>, где
+     * @return  возвращает массив <code>[y, x]</code>, где
      *          x - координата хода ИИ по горизонтали
      *          y - координата хода ИИ по вертикали
      */
@@ -253,7 +258,7 @@ public class TicTacToe {
     }
 
     /**
-     *  Метод производит подсчет веса комбинации на поле fieldAI
+     *  Метод производит подсчет веса комбинаций на поле fieldAI
      *
      * @param maxSymbols    число символов для выигрышной комбинации
      * @return  результат вычисления веса комбинаций на поле
@@ -302,14 +307,15 @@ public class TicTacToe {
     /**
      *  Проверка квадрата на выигрышную комбинацию
      *
-     *  @param offsetX  сдвиг координаты X левого верхнего улла квадрата
+     *  @param field    поле для проверки выигрыщной комбинации
+     *  @param offsetX  сдвиг координаты X левого верхнего угла квадрата
      *                  относительно начала поля (от нуля)
-     *  @param offsetY  двиг координаты Y левого верхнего улла квадрата
+     *  @param offsetY  сдвиг координаты Y левого верхнего угла квадрата
      *                  относительно начала поля (от нуля)
      *  @param sqrSize  размер стороны квадрата
      *  @param symbol   символ для проверки
      *  @return > 0 - выигрышная комбинация была найдена
-     *          < 0 - выигрышная комбинация не была найдена
+     *          = 0 - выигрышная комбинация не была найдена
      */
     private static int checkSqr(char[][] field, int offsetX, int offsetY, int sqrSize, char symbol) {
         return checkDiags(field, offsetX, offsetY, sqrSize, symbol) + checkLines(field, offsetX, offsetY, sqrSize, symbol);
@@ -355,6 +361,10 @@ public class TicTacToe {
 
     /**
      *   Проверка на ничью
+     *
+     *  @param  field   поле для проверки на ничью
+     *  @return true    все клектки заданного поля заняты
+     *          false   на заданном поле есть свободные клетки
      */
     private static boolean isDraw(char[][] field) {
         for (int i = 0; i < fieldSizeY; i++) {
@@ -388,9 +398,12 @@ public class TicTacToe {
     /**
      *   Проверка клетки поля на определенный символ или пустое поле
      *
-     *   @param  x   координата поля по горизонтали
-     *   @param  y   координата поля по вертикали
-     *   @param  symbol   символ для проверки
+     *  @param  field поле для проверки клекти
+     *  @param  x   координата поля по горизонтали
+     *  @param  y   координата поля по вертикали
+     *  @param  symbol   символ для проверки
+     *  @return true    в заданной клектке поля <code>field</code>
+     *                  есть символ <code>symbol</code>
      */
     private static boolean isSymbolInCell(char[][] field, int x, int y, char symbol) {
         return field[y][x] == symbol;
