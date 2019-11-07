@@ -267,7 +267,7 @@ public class TicTacToe {
             for (int j = 0; j < sqrX; j++) {
                 for (int k = (maxSymbols - 1); k <= maxSymbols ; k++) {
                     score += 10 * (k - 1) * checkSqr(fieldAI, j, i, k, DOT_AI);
-                    score -= 10 * (k - 1) * checkSqr(fieldAI, j, i, k, DOT_HUMAN);
+                    score -= 20 * (k - 1) * checkSqr(fieldAI, j, i, k, DOT_HUMAN);
                 }
                 //score = score + 100  * checkSqr(fieldAI, j, i, maxSymbols, DOT_AI) + 10 * checkSqr(fieldAI, j, i, maxSymbols - 1, DOT_AI);
                 //score = score - 100  * checkSqr(fieldAI, j, i, maxSymbols, DOT_HUMAN) - 10 * checkSqr(fieldAI, j, i, maxSymbols - 1, DOT_HUMAN);
