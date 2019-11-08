@@ -16,6 +16,9 @@ public class TicTacToe {
     private static final int MIN_SIZE = 3;      // минимальный размер поля по вертикали и горизонтали
     private static final int MID_ALG_DEPTH = 2; // параметра для алгоритма минимакс
     private static final int HIGH_ALG_DEPTH = 5; // параметра для алгоритма минимакс
+    private static final int K_MAX = 1000;
+    private static final int K_MID = 100;
+    private static final int K_LOW = 10;
     private static final String STR_YES = "да"; // ответ для продолжения игры
     private static final String STR_NO = "нет"; // ответ для завершения игры
 
@@ -158,7 +161,7 @@ public class TicTacToe {
      */
     private static void aiTurnToWin(int algDepth) {
         copyField();
-        int[] move = minimax(algDepth, DOT_AI, possibleMoves);
+        int[] move = minimax(algDepth, DOT_AI, Integer.MIN_VALUE, Integer.MAX_VALUE, possibleMoves);
         field[move[1]][move[2]] = DOT_AI;
     }
 
@@ -176,11 +179,6 @@ public class TicTacToe {
 
     /**
      *  Алгоритм выбора оптимального хода минимакс
-     *  Источник: https://www.ntu.edu.sg/home/ehchua/programming/java/JavaGame_TicTacToe_AI.html
-     *  Примечание - алгоритм работает не так хорошо, как хотелось бы, т.к. скорее всего
-     *  не корректно адаптирован метод расчета веса комбинаций в методе <code>getScore</code>
-     *  Однако для поля 4 на 4 может работать лучше чем для поля 3 на 3
-     *  Проверерно на полях различных размеров (в т.ч. не квадратных полях)
      *
      * @param depth     глубина поиска
      * @param symbol    символ для имитации хода
@@ -189,34 +187,35 @@ public class TicTacToe {
      *          x - координата хода ИИ по горизонтали
      *          y - координата хода ИИ по вертикали
      */
-    private static int[] minimax(int depth, char symbol, int turnsCount) {
+    private static int[] minimax(int depth, char symbol, int alpha, int beta, int turnsCount) {
         int[][] nextMoves = getPossibleTurns(turnsCount);
 
         // mySeed is maximizing; while oppSeed is minimizing
-        int bestScore = (symbol == DOT_AI) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        int currentScore;
+        //int bestScore = (symbol == DOT_AI) ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int score;
         int bestRow = -1;
         int bestCol = -1;
 
         if (nextMoves == null || depth == 0) {
             // Gameover or depth reached, evaluate score
-            bestScore = getScore(symbolsToWin);
+            score = getScore(symbolsToWin);
+            return new int[] {score, bestRow, bestCol};
         } else {
             for (int[] move : nextMoves) {
                 // try this move for the current "player"
                 fieldAI[move[1]][move[0]] = symbol;
                 turnsCount--;
                 if (symbol == DOT_AI) {  // mySeed (computer) is maximizing player
-                    currentScore = minimax(depth - 1, DOT_HUMAN, turnsCount)[0];
-                    if (currentScore > bestScore) {
-                        bestScore = currentScore;
+                    score = minimax(depth - 1, DOT_HUMAN, alpha, beta, turnsCount)[0];
+                    if (score > alpha) {
+                        alpha = score;
                         bestRow = move[1];
                         bestCol = move[0];
                     }
                 } else {  // oppSeed is minimizing player
-                    currentScore = minimax(depth - 1, DOT_AI, turnsCount)[0];
-                    if (currentScore < bestScore) {
-                        bestScore = currentScore;
+                    score = minimax(depth - 1, DOT_AI, alpha, beta, turnsCount)[0];
+                    if (score < beta) {
+                        beta = score;
                         bestRow = move[1];
                         bestCol = move[0];
                     }
@@ -224,9 +223,10 @@ public class TicTacToe {
                 // undo move
                 fieldAI[move[1]][move[0]] = DOT_EMPTY;
                 turnsCount++;
+                if (alpha >= beta) break;
             }
         }
-        return new int[] {bestScore, bestRow, bestCol};
+        return new int[] {(symbol == DOT_AI) ? alpha : beta, bestRow, bestCol};
     }
 
     /**
@@ -240,7 +240,7 @@ public class TicTacToe {
         int movesCount = 0;
 
         // If gameover, i.e., no next move
-        if (isDraw(fieldAI)) {
+        if (checkWin(fieldAI, DOT_AI) || checkWin(fieldAI, DOT_HUMAN)) {
             return null;   // return empty list
         }
 
@@ -270,12 +270,14 @@ public class TicTacToe {
 
         for (int i = 0; i < sqrY; i++) {
             for (int j = 0; j < sqrX; j++) {
-                for (int k = (maxSymbols - 1); k <= maxSymbols ; k++) {
-                    score += 10 * (k - 1) * checkSqr(fieldAI, j, i, k, DOT_AI);
+                /*for (int k = (maxSymbols - 1); k <= maxSymbols ; k++) {
+                    score += 19 * (k - 1) * checkSqr(fieldAI, j, i, k, DOT_AI);
                     score -= 20 * (k - 1) * checkSqr(fieldAI, j, i, k, DOT_HUMAN);
-                }
-                //score = score + 100  * checkSqr(fieldAI, j, i, maxSymbols, DOT_AI) + 10 * checkSqr(fieldAI, j, i, maxSymbols - 1, DOT_AI);
-                //score = score - 100  * checkSqr(fieldAI, j, i, maxSymbols, DOT_HUMAN) - 10 * checkSqr(fieldAI, j, i, maxSymbols - 1, DOT_HUMAN);
+                }*/
+                score += checkDiags(fieldAI, j, i, maxSymbols, DOT_AI)[1];
+                score += checkLines(fieldAI, j, i, maxSymbols, DOT_AI)[1];
+                score -= checkDiags(fieldAI, j, i, maxSymbols, DOT_HUMAN)[1];
+                score -= checkLines(fieldAI, j, i, maxSymbols, DOT_HUMAN)[1];
             }
         }
         return score;
@@ -290,7 +292,7 @@ public class TicTacToe {
      *  @return true - выигрышная комбинация была найдена
      *          false - выигрышная комбинация не была найдена
      */
-    private static boolean checkWin(char symbol) {
+    private static boolean checkWin(char[][] field, char symbol) {
         // для проверки выигрыша разобьем игровое поле на квадраты со стороной размером symbolsToWin
         int sqrX = fieldSizeX - symbolsToWin + 1; // число квадратов по горизонтали
         int sqrY = fieldSizeY - symbolsToWin + 1; // число квадратов по вертикали
@@ -318,44 +320,80 @@ public class TicTacToe {
      *          = 0 - выигрышная комбинация не была найдена
      */
     private static int checkSqr(char[][] field, int offsetX, int offsetY, int sqrSize, char symbol) {
-        return checkDiags(field, offsetX, offsetY, sqrSize, symbol) + checkLines(field, offsetX, offsetY, sqrSize, symbol);
+        return checkDiags(field, offsetX, offsetY, sqrSize, symbol)[0] + checkLines(field, offsetX, offsetY, sqrSize, symbol)[0];
     }
 
     /**
      *  Проверка диагоналей квадрата на выигрышную комбинацию
      */
-    private static int checkDiags(char[][] field, int offsetX, int offsetY, int sqrSize, char symbol) {
+    private static int[] checkDiags(char[][] field, int offsetX, int offsetY, int sqrSize, char symbol) {
         boolean diag1 = true;   // инициализация проверки диагонали с левого верхнего угла
         boolean diag2 = true;   // инициализация проверки диагонали с левого нижнего угла
+        int d1score = 0;
+        int d2score = 0;
         int score = 0;
         for (int i = 0; i < sqrSize; i++)
         {
-            diag1 &= isSymbolInCell(field,i + offsetX, i + offsetY, symbol);
-            diag2 &= isSymbolInCell(field,sqrSize - i - 1 + offsetX, i + offsetY, symbol);
-            if (!diag1 && !diag2) break;
+            if (isSymbolInCell(field,i + offsetX, i + offsetY, symbol)) {
+                diag1 &= true;
+                d1score++;
+            } else
+                diag1 &= false;
+            if (isSymbolInCell(field,sqrSize - i - 1 + offsetX, i + offsetY, symbol)) {
+                diag2 &= true;
+                d2score++;
+            } else
+                diag2 &= false;
         }
-        if (diag1) score++;
-        if (diag2) score++;
-        return score;
+        score += getScore(d1score, sqrSize);
+        score += getScore(d2score, sqrSize);
+        return new int[]{(diag1 || diag2) ? 1 : 0, score};
     }
 
     /**
      *  Проверка строк и столбцов квадрата на выигрышную комбинацию
      */
-    private static int checkLines(char[][] field, int offsetX, int offsetY, int sqrSize, char symbol) {
+    private static int[] checkLines(char[][] field, int offsetX, int offsetY, int sqrSize, char symbol) {
         boolean col, row;       // переменные, которые хранят проверку столбца, колонки
+        int win = 0;
+        int cScore, rScore;
         int score = 0;
         for (int i = 0; i < sqrSize; i++) {
             col = true;
             row = true;
+            cScore = 0;
+            rScore = 0;
             for (int j = 0; j < sqrSize; j++) {
-                col &= isSymbolInCell(field,i + offsetX, j + offsetY, symbol);
-                row &= isSymbolInCell(field,j + offsetX, i + offsetY, symbol);
-                if (!col && !row) break;
+                if (isSymbolInCell(field,i + offsetX, j + offsetY, symbol)) {
+                    col &= true;
+                    cScore++;
+                } else
+                    col &= false;
+                if (isSymbolInCell(field,j + offsetX, i + offsetY, symbol)) {
+                    row &= true;
+                    rScore++;
+                } else
+                    row &= false;
             }
-            if (col) score++;
-            if (row) score++;
+            if (col || row) win++;
+            score += getScore(cScore, sqrSize);
+            score += getScore(rScore, sqrSize);
+            //System.out.printf("col = %d; row = %d\n", cScore, rScore);
         }
+        //System.out.printf("score = %d\n", score);
+        return new int[]{win, score};
+    }
+
+    private static int getScore(int toCount, int toCompare) {
+        int score = 0;
+        if (toCount == toCompare) {
+            score += K_MAX;
+        } else if (toCount == toCompare - 1) {
+            score += K_MID;
+        } else if (toCount == toCompare - 2) {
+            score += K_LOW;
+        } else if (toCount != 0)
+            score++;
         return score;
     }
 
@@ -415,6 +453,7 @@ public class TicTacToe {
             System.out.printf("Желает сыграть еще раз? (%s или %s)>>> ", STR_YES, STR_NO);
             answer = SCANNER.next();
         } while (!isValidAnswer(answer));
+        isHumanTurn = true;
         return answer.equals(STR_YES);
     }
 
@@ -431,7 +470,7 @@ public class TicTacToe {
             while (true) {
                 nextTurn(isHumanTurn);
                 showField();
-                if (checkWin((isHumanTurn) ? DOT_HUMAN : DOT_AI)) {
+                if (checkWin(field, (isHumanTurn) ? DOT_HUMAN : DOT_AI)) {
                     System.out.printf("%s win!\n", ((isHumanTurn) ? "Human" : "AI"));
                     break;
                 }
