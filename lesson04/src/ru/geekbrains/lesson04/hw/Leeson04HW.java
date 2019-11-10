@@ -26,7 +26,7 @@ public class Leeson04HW {
      * старше <code>age</code>
      *
      * @param cooperators   массив экземпляров класса <code>Cooperator</code>
-     * @param age           возраст сотрудника, инф-ию о к-ром отобразить
+     * @param age           планка возраста сотрудника
      */
     private static void printCoopInfo(Cooperator[] cooperators, int age) {
         System.out.printf("Сотрудники старше %d лет:\n", age);
@@ -38,12 +38,12 @@ public class Leeson04HW {
     }
 
     /**
-     * Повышение зарплаты сотрудниках,
+     * Повышение зарплаты сотрудникам,
      * чей возраст больше <code>age</code>
      * посредством метода <code>setSalary()</code> класса <code>Cooperator</code>
      *
      * @param cooperators   массив экземпляров класса <code>Cooperator</code>
-     * @param age           возраст сотрудника для повышения ЗП
+     * @param age           планка возраста сотрудника для повышения ЗП
      * @param salaryDelta   сумма повышения ЗП
      */
     private static void moreSalary(Cooperator[] cooperators, int age, int salaryDelta) {
@@ -57,14 +57,14 @@ public class Leeson04HW {
     }
 
     /**
-     * Повышение зарплаты сотрудниках, чей возраст
+     * Повышение зарплаты сотрудникам, чей возраст
      * больше <code>ageStart</code> и меньше <code>ageFinish</code>
      * посредством метода <code>moreSalary()</code>
      * класса <code>Cooperator</code>
      *
      * @param cooperators   массив экземпляров класса <code>Cooperator</code>
-     * @param ageStart      возраст сотрудника для повышения ЗП
-     * @param ageFinish     возраст сотрудника для повышения ЗП
+     * @param ageStart      планка возраста сотрудника для повышения ЗП
+     * @param ageFinish     планка возраста сотрудника для повышения ЗП
      * @param salaryDelta   сумма повышения ЗП
      */
     private static void moreSalary(Cooperator[] cooperators, int ageStart, int ageFinish, int salaryDelta) {
