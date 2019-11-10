@@ -15,4 +15,20 @@ public class Cooperator {
         this.salary = salary;
     }
 
+    public String getFio() {
+        return fio;
+    }
+    private int getAge() {
+        return age;
+    }
+    private String getPhoneNumber() {
+        return phoneNumber;
+    }
+    private String getPost() {
+        return post;
+    }
+    private int getSalary() {
+        return salary;
+    }
+    
 }
