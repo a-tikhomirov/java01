@@ -19,8 +19,8 @@ public class TicTacToe {
     private static final int K_MAX = 1000;
     private static final int K_MID = 100;
     private static final int K_LOW = 10;
-    private static final String STR_YES = "да"; // ответ для продолжения игры
-    private static final String STR_NO = "нет"; // ответ для завершения игры
+    private static final int ANSWER_YES = 1;    // ответ для продолжения игры
+    private static final int ANSWER_NO = 0;     // ответ для завершения игры
 
     private static final Scanner SCANNER = new Scanner(System.in);  // используется для считывания пользовательского ввода в консоли
     private static final Random RANDOM = new Random();              // используется для генерации псевдослучайных значений
@@ -83,8 +83,11 @@ public class TicTacToe {
      *   Отрисовка игрового поля в консоли
      */
     private static void showField() {
+        System.out.print("  ");
+        for (int i = 1; i <= fieldSizeX; i++) System.out.printf(" %d", i);
+        System.out.println();
         for (int i = 0; i < fieldSizeY; i++) {
-            System.out.print("|");
+            System.out.printf("%d |", i + 1);
             for (int j = 0; j < fieldSizeX; j++) {
                 System.out.print(field[i][j] + "|");
             }
@@ -448,17 +451,17 @@ public class TicTacToe {
     }
 
     private static boolean promptToContinue() {
-        String answer = "";
+        int answer = -1;
         do {
-            System.out.printf("Желает сыграть еще раз? (%s или %s)>>> ", STR_YES, STR_NO);
-            answer = SCANNER.next();
+            System.out.printf("Желает сыграть еще раз? (%d - Да или %d - Нет)>>> ", ANSWER_YES, ANSWER_NO);
+            answer = SCANNER.nextInt();
         } while (!isValidAnswer(answer));
         isHumanTurn = true;
-        return answer.equals(STR_YES);
+        return answer == ANSWER_YES;
     }
 
-    private static boolean isValidAnswer(String answer) {
-        return answer.equals(STR_NO) || answer.equals(STR_YES);
+    private static boolean isValidAnswer(int answer) {
+        return answer == ANSWER_NO || answer == ANSWER_YES;
     }
 
     // Точка входа в программу
