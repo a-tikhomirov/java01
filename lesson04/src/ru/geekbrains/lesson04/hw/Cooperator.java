@@ -18,17 +18,17 @@ public class Cooperator {
     public String getFio() {
         return fio;
     }
-    private int getAge() {
+    public int getAge() {
         return age;
     }
-    private String getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
-    private String getPost() {
+    public String getPost() {
         return post;
     }
-    private int getSalary() {
+    public int getSalary() {
         return salary;
     }
-    
+
 }
