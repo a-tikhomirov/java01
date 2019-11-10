@@ -31,4 +31,13 @@ public class Cooperator {
         return salary;
     }
 
+    public String getCoopInfo() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ФИО:\t\t" + fio + "\n");
+        sb.append("Возраст:\t" + age + "\n");
+        sb.append("Номер тел.:\t" + phoneNumber + "\n");
+        sb.append("Должность:\t" + post + "\n");
+        sb.append("Зарплата:\t" + salary + "\n");
+        return sb.toString();
+    }
 }
