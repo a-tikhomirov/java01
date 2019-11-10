@@ -1,4 +1,4 @@
-package ru.geekbrains.lesson04.hw;
+package ru.geekbrains.javaone.lesson04.hw;
 
 public class Cooperator {
     private static int idCounter = 1;
