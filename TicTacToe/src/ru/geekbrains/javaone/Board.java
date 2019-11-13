@@ -2,7 +2,7 @@ package ru.geekbrains.javaone;
 
 public class Board {
     private static final int MIN_SIZE = 3;          // минимальный замер поля по горизонтали/вертикали
-    private final char[] P_SEED = {'X', '0', '.'};  // символы для отображения на поле ходя 2 игрка, 2 игрока и пустой клетки
+    private final char[] P_SEED = {'X', '0', '.'};  // символы для отображения на поле ходя 1 игрока, 2 игрока и пустой клетки
     public static final byte P1_SEED_I = 0;         // индекс символа 1 игрока массива P_SEED
     public static final byte P2_SEED_I = 1;         // индекс символа 2 игрока массива P_SEED
     private final byte EMPTY_SEED_I = 2;            // индекс символа пустой клетки массива P_SEED
@@ -75,8 +75,8 @@ public class Board {
         int xStart = (startLater) ? x - seedsToWin + 1 : 0;
         int xEnd = (endEarlier) ? x + seedsToWin - 1 : fieldSizeX - 1;
         int possCombos = xEnd - xStart - seedsToWin + 2;
-        System.out.printf("Row: x: %d to %d;\t y: %d;\t" +
-                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
+//        System.out.printf("Row: x: %d to %d;\ty: %d;\t" +
+//                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
         for (int i = 0; i < possCombos; ++i) {
             rowCombo = true;
             for (int j = 0; j < seedsToWin; ++j) {
@@ -93,8 +93,8 @@ public class Board {
         int yStart = (startLater) ? y - seedsToWin + 1 : 0;
         int yEnd = (endLess) ? y + seedsToWin - 1 : fieldSizeY - 1;
         int possCombos = yEnd - yStart - seedsToWin + 2;
-        System.out.printf("Col: x: %d;\t y: %d to %d;\t" +
-                "Row possible combos = %d\n", x, yStart, yEnd, possCombos);
+//        System.out.printf("Col: x: %d;\ty: %d to %d;\t" +
+//                "Col possible combos = %d\n", x, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
             colCombo = true;
             for (int j = 0; j < seedsToWin; ++j) {
@@ -130,9 +130,9 @@ public class Board {
                 ++yEnd;
             }
         possCombos = yEnd - yStart - seedsToWin + 2;
-        System.out.printf("UL Diag: x: %d to %d;\t y: %d " +
-                "to %d;\t Diag possible combos = %d\n",
-                xStart, xEnd, yStart, yEnd, possCombos);
+//        System.out.printf("UL Diag: x: %d to %d;\ty: %d " +
+//                "to %d;\tDiag possible combos = %d\n",
+//                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
             diagCombo = true;
             for (int j = 0; j < seedsToWin; ++j) {
@@ -168,8 +168,9 @@ public class Board {
                 --yEnd;
             }
         possCombos = yStart - yEnd - seedsToWin + 2;
-        System.out.printf("DL Diag: x: %d to %d;\t y: %d " +
-                "to %d;\t Diag possible combos = %d\n", xStart, xEnd, yStart, yEnd, possCombos);
+//        System.out.printf("DL Diag: x: %d to %d;\ty: %d " +
+//                "to %d;\tDiag possible combos = %d\n",
+//                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
             diagCombo = true;
             for (int j = 0; j < seedsToWin; ++j) {
