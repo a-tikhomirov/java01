@@ -1,22 +1,45 @@
 package ru.geekbrains.javaone.lesson05.hw;
 
 public class Bird extends Animal {
+    private static final float RUN_MAX = 5.5f;
+
+    private float maxRunDistance = 5;
+    private float maxJumpHeigth = 0.2f;
+
     public Bird(String name, String color) {
         super(name, color);
     }
 
-    @Override
-    protected String run(int distance) {
-        return name + " make little jumps for " + distance + " meters";
+    public Bird(String name, String color, float maxRunDistance) {
+        super(name, color);
+        setMaxRunDistance(maxRunDistance);
+    }
+
+    public void setMaxRunDistance(float maxRunDistance) {
+        this.maxRunDistance =
+                maxRunDistance > RUN_MAX ? RUN_MAX : maxRunDistance;
+    }
+
+    public String voice() {
+        return name + " whistles";
     }
 
     @Override
-    protected String jump(int heigth) {
-        return name + " jumps and... flies away";
+    public String run(float distance) {
+        return name + " makes little jumps for "
+                + ((distance < maxRunDistance) ? distance : maxRunDistance) + " meters";
     }
 
     @Override
-    protected String swim(int distance) {
-        return name + " looks disapproved";
+    public String jump(float heigth) {
+        if (heigth > maxJumpHeigth)
+            return voice();
+        else
+            return super.jump(heigth);
+    }
+
+    @Override
+    public String swim(float distance) {
+        return name + " flies away";
     }
 }

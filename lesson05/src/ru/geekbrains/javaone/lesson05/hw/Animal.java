@@ -9,23 +9,23 @@ public abstract class Animal {
         this.color = color;
     }
 
-    public String getName() {
+    protected String getName() {
         return name;
     }
 
-    public String getColor() {
+    protected String getColor() {
         return color;
     }
 
-    protected String run(int distance) {
+    protected String run(float distance) {
         return name + " runs " + distance + " meters";
     }
 
-    protected String jump(int heigth) {
+    protected String jump(float heigth) {
         return name + " jumps " + heigth + " meters high";
     }
 
-    protected String swim(int distance) {
+    protected String swim(float distance) {
         return name + " swims " + distance + " meters";
     }
 }
