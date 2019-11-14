@@ -5,14 +5,14 @@ public class Board {
     private final char[] P_SEED = {'X', '0', '.'};  // символы для отображения на поле ходя 1 игрока, 2 игрока и пустой клетки
     public static final byte P1_SEED_I = 0;         // индекс символа 1 игрока массива P_SEED
     public static final byte P2_SEED_I = 1;         // индекс символа 2 игрока массива P_SEED
-    private final byte EMPTY_SEED_I = 2;            // индекс символа пустой клетки массива P_SEED
+    protected final byte EMPTY_SEED_I = 2;            // индекс символа пустой клетки массива P_SEED
 
-    private byte[][] field;     // массив, содержащий числовое представление игрового поля
-    private int fieldSizeX;     // размер поля для игры по горизонтали
-    private int fieldSizeY;     // размер поля для игры по вертикали
-    private int seedsToWin;     // число символов подряд для выигрыша
-    private int turnsCounter;   // число возможных ходов
-    private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
+    protected byte[][] field;     // массив, содержащий числовое представление игрового поля
+    protected int fieldSizeX;     // размер поля для игры по горизонтали
+    protected int fieldSizeY;     // размер поля для игры по вертикали
+    protected int seedsToWin;     // число символов подряд для выигрыша
+    protected int turnsCounter;   // число возможных ходов
+    protected byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
 
     public Board() {
         this(MIN_SIZE, MIN_SIZE);
@@ -203,10 +203,10 @@ public class Board {
     public String toStringBS() {
         StringBuilder sb = new StringBuilder();
         sb.append("  ");
-        for (int i = 0; i < fieldSizeX; ++i) sb.append("\t" + i);
+        for (int i = 1; i <= fieldSizeX; ++i) sb.append("\t" + i);
         sb.append("\n");
         for (int i = 0; i < fieldSizeY; ++i) {
-            sb.append(i);
+            sb.append(i + 1);
             for (int j = 0; j < fieldSizeX; ++j) {
                 sb.append("\t" + P_SEED[field[i][j]]);
             }

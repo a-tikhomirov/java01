@@ -8,11 +8,16 @@ public class TicTacToe {
     private static final Random RANDOM = new Random();              // используется для генерации псевдослучайных значений
     private static final String HUMAN = "Human";
     private static final String AI = "AI";
+    private static final int MIN_DIFF = 0;
+    private static final int MID_DIFF = 1;
 
     private static final int ANSWER_YES = 1;    // ответ для продолжения игры
     private static final int ANSWER_NO = 0;     // ответ для завершения игры
 
     private static Board gameBoard;             // поле для игры в крестики нолики
+    private static AI ai;
+    private static AIBoard gameBoardAI;
+    private static int difficulty;
     private static boolean isHumanTurn;         // true - если текущий ход игрока, false - текущий ход ИИ
     private static byte humanIndex;
     private static byte aiIndex;
@@ -103,6 +108,11 @@ public class TicTacToe {
             humanIndex = Board.P2_SEED_I;
             aiIndex = Board.P1_SEED_I;
         }
+        ai = new AI(aiIndex, humanIndex);
+    }
+
+    private static void initDifficulty() {
+
     }
 
     /**
@@ -137,6 +147,11 @@ public class TicTacToe {
      *   Ход ИИ
      */
     private static void aiTurn() {
+        int[] coords = ai.getXY(gameBoard);
+        gameBoard.makeTurn(coords[2], coords[1], aiIndex);
+    }
+
+    private static void randomTurn() {
         int x;
         int y;
         do {
