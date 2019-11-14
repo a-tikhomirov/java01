@@ -1,21 +1,17 @@
 package ru.geekbrains.javaone;
 
-import java.util.Random;    // использвуется для генерации псевдослучайных значений
 import java.util.Scanner;   // используется для считывания пользовательского ввода в консоли
 
 public class TicTacToe {
     private static final Scanner SCANNER = new Scanner(System.in);  // используется для считывания пользовательского ввода в консоли
-    private static final Random RANDOM = new Random();              // используется для генерации псевдослучайных значений
     private static final String HUMAN = "Human";
     private static final String AI = "AI";
-    private static final int MIN_DIFF = 0;
-    private static final int MID_DIFF = 1;
 
     private static final int ANSWER_YES = 1;    // ответ для продолжения игры
     private static final int ANSWER_NO = 0;     // ответ для завершения игры
 
     private static Board gameBoard;             // поле для игры в крестики нолики
-    private static AI ai;
+    private static AIPlayer ai;
     private static AIBoard gameBoardAI;
     private static int difficulty;
     private static boolean isHumanTurn;         // true - если текущий ход игрока, false - текущий ход ИИ
@@ -30,6 +26,7 @@ public class TicTacToe {
         initField();
         initSeedsToWin();
         initTurnsOrder();
+        initDifficulty();
     }
 
     /**
@@ -108,11 +105,27 @@ public class TicTacToe {
             humanIndex = Board.P2_SEED_I;
             aiIndex = Board.P1_SEED_I;
         }
-        ai = new AI(aiIndex, humanIndex);
     }
 
     private static void initDifficulty() {
-
+        String str;
+        int seedsToWin;
+        do {
+            System.out.printf("Выберите сложность игры (от %d до %d) " +
+                            "или нажмите Enter для значения по умолчанию (%d)>>> ",
+                    AIPlayer.MIN_DIF, AIPlayer.MAX_DIF, AIPlayer.DEF_DIF);
+            str = SCANNER.nextLine();
+            if (str.equalsIgnoreCase("")) {
+                difficulty = -1;
+                break;
+            }
+            difficulty = Integer.parseInt(str);
+        } while (!AIPlayer.isValidDifficluty(difficulty));
+        if (difficulty == -1) {
+            ai = new AIPlayer(aiIndex, humanIndex);
+        } else {
+            ai = new AIPlayer(aiIndex, humanIndex, 4);
+        }
     }
 
     /**
@@ -148,17 +161,10 @@ public class TicTacToe {
      */
     private static void aiTurn() {
         int[] coords = ai.getXY(gameBoard);
-        gameBoard.makeTurn(coords[2], coords[1], aiIndex);
+        gameBoard.makeTurn(coords[0], coords[1], aiIndex);
     }
 
-    private static void randomTurn() {
-        int x;
-        int y;
-        do {
-            x = RANDOM.nextInt(gameBoard.getFieldSizeX());
-            y = RANDOM.nextInt(gameBoard.getFieldSizeY());
-        } while (!gameBoard.makeTurn(x, y, aiIndex));
-    }
+
 
     private static boolean promptToContinue() {
         int answer = -1;

@@ -8,6 +8,7 @@ public class AIBoard extends Board {
     //public int score;
     private byte ai_seed;
     private byte human_seed;
+    private int turnScore;
 
     public AIBoard(Board board, byte ai_seed, byte human_seed){
         this(board);
@@ -19,6 +20,22 @@ public class AIBoard extends Board {
         super(board.getFieldSizeX(), board.getFieldSizeY());
         this.seedsToWin = board.getSeedsToWin();
         copyField(board.field);
+    }
+
+    @Override
+    public boolean makeTurn(int x, int y, byte player) {
+        if (isEmptyCell(x, y) || player == EMPTY_SEED_I) {
+            field[y][x] = player;
+            if (player == EMPTY_SEED_I) {
+                ++turnsCounter;
+            } else {
+                --turnsCounter;
+            }
+            winnerIndex = getWinner(x, y,  player);
+            turnScore = getScore(x, y);
+            return true;
+        } else
+            return false;
     }
 
     private void copyField(byte[][] field) {
@@ -52,12 +69,11 @@ public class AIBoard extends Board {
         return nextMoves;
     }
 
-    public void undoTurn(int x, int y) {
-        field[y][x] = EMPTY_SEED_I;
-        ++turnsCounter;
+    public int getTurnScore() {
+        return turnScore;
     }
 
-    public int getScore(int x, int y) {
+    private int getScore(int x, int y) {
         boolean xStartLater = x - seedsToWin + 1 > 0;
         boolean yStartLater = y - seedsToWin + 1 > 0;
         boolean xEndEarlier = x + seedsToWin < fieldSizeX;
@@ -86,42 +102,48 @@ public class AIBoard extends Board {
 
 
     private int getRowScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore = 0;
-        int humanScore = 0;
+        int aiScore, humanScore;
+        int score = 0;
         int xStart = (startLater) ? x - seedsToWin + 1 : 0;
         int xEnd = (endEarlier) ? x + seedsToWin - 1 : fieldSizeX - 1;
         int possCombos = xEnd - xStart - seedsToWin + 2;
 //        System.out.printf("Row: x: %d to %d;\ty: %d;\t" +
 //                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
         for (int i = 0; i < possCombos; ++i) {
+            aiScore = 0;
+            humanScore = 0;
             for (int j = 0; j < seedsToWin; ++j) {
                 if (field[y][j + xStart + i] == ai_seed) ++aiScore;
                 if (field[y][j + xStart + i] == human_seed) ++humanScore;
             }
+            score = score + getScore(aiScore) - getScore(humanScore);
         }
-        return getScore(aiScore) - getScore(humanScore);
+        return score;
     }
 
     private int getColScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore = 0;
-        int humanScore = 0;
+        int aiScore, humanScore;
+        int score = 0;
         int yStart = (startLater) ? y - seedsToWin + 1 : 0;
         int yEnd = (endEarlier) ? y + seedsToWin - 1 : fieldSizeY - 1;
         int possCombos = yEnd - yStart - seedsToWin + 2;
 //        System.out.printf("Col: x: %d;\ty: %d to %d;\t" +
 //                "Col possible combos = %d\n", x, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
+            aiScore = 0;
+            humanScore = 0;
             for (int j = 0; j < seedsToWin; ++j) {
                 if (field[j + yStart + i][x] == ai_seed) ++aiScore;
                 if (field[j + yStart + i][x] == human_seed) ++humanScore;
             }
+            score = score + getScore(aiScore) - getScore(humanScore);
         }
-        return getScore(aiScore) - getScore(humanScore);
+        return score;
     }
 
     private int getDiagULScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore = 0;
-        int humanScore = 0;
+        int aiScore, humanScore;
+        int score = 0;
         int xStart = x;
         int yStart = y;
         int xEnd = x;
@@ -148,17 +170,20 @@ public class AIBoard extends Board {
 //                "to %d;\tDiag possible combos = %d\n",
 //                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
+            aiScore = 0;
+            humanScore = 0;
             for (int j = 0; j < seedsToWin; ++j) {
                 if (field[j + yStart + i][j + xStart + i] == ai_seed) ++aiScore;
                 if (field[j + yStart + i][j + xStart + i] == human_seed) ++humanScore;
             }
+            score = score + getScore(aiScore) - getScore(humanScore);
         }
-        return getScore(aiScore) - getScore(humanScore);
+        return score;
     }
 
     private int getDiagDLScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore = 0;
-        int humanScore = 0;
+        int aiScore, humanScore;
+        int score = 0;
         int xStart = x;
         int yStart = y;
         int xEnd = x;
@@ -185,120 +210,14 @@ public class AIBoard extends Board {
 //                "to %d;\tDiag possible combos = %d\n",
 //                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
+            aiScore = 0;
+            humanScore = 0;
             for (int j = 0; j < seedsToWin; ++j) {
                 if (field[yStart - i - j][j + xStart + i] == ai_seed) ++aiScore;
                 if (field[yStart - i - j][j + xStart + i] == human_seed) ++humanScore;
             }
+            score = score + getScore(aiScore) - getScore(humanScore);
         }
-        return getScore(aiScore) - getScore(humanScore);
+        return score;
     }
-    /*
-    private int getRowScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore = 0;
-        int humanScore = 0;
-        int xStart = (startLater) ? x - seedsToWin + 1 : 0;
-        int xEnd = (endEarlier) ? x + seedsToWin - 1 : fieldSizeX - 1;
-        int possCombos = xEnd - xStart - seedsToWin + 2;
-//        System.out.printf("Row: x: %d to %d;\ty: %d;\t" +
-//                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[y][j + xStart + i] == ai_seed) ++aiScore;
-                if (field[y][j + xStart + i] == human_seed) ++humanScore;
-            }
-        }
-        return getScore(aiScore) - getScore(humanScore);
-    }
-
-    private int getColScore(int x, int y, boolean startLater, boolean endLess) {
-        int aiScore = 0;
-        int humanScore = 0;
-        int yStart = (startLater) ? y - seedsToWin + 1 : 0;
-        int yEnd = (endLess) ? y + seedsToWin - 1 : fieldSizeY - 1;
-        int possCombos = yEnd - yStart - seedsToWin + 2;
-//        System.out.printf("Col: x: %d;\ty: %d to %d;\t" +
-//                "Col possible combos = %d\n", x, yStart, yEnd, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[j + yStart + i][x] == ai_seed) ++aiScore;
-                if (field[j + yStart + i][x] == human_seed) ++humanScore;
-            }
-        }
-        return getScore(aiScore) - getScore(humanScore);
-    }
-
-    private int getDiagULScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore = 0;
-        int humanScore = 0;
-        int xStart = x;
-        int yStart = y;
-        int xEnd = x;
-        int yEnd = y;
-        int possCombos;
-        if (startLater) {
-            xStart = x - seedsToWin + 1;
-            yStart = y - seedsToWin + 1;
-        } else
-            while (xStart != 0 && yStart != 0) {
-                --xStart;
-                --yStart;
-            }
-        if (endEarlier) {
-            xEnd = x + seedsToWin - 1;
-            yEnd = y + seedsToWin - 1;
-        } else
-            while (xEnd != fieldSizeX - 1 && yEnd != fieldSizeY - 1) {
-                ++xEnd;
-                ++yEnd;
-            }
-        possCombos = yEnd - yStart - seedsToWin + 2;
-//        System.out.printf("UL Diag: x: %d to %d;\ty: %d " +
-//                "to %d;\tDiag possible combos = %d\n",
-//                xStart, xEnd, yStart, yEnd, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[j + yStart + i][j + xStart + i] == ai_seed) ++aiScore;
-                if (field[j + yStart + i][j + xStart + i] == human_seed) ++humanScore;
-            }
-        }
-        return getScore(aiScore) - getScore(humanScore);
-    }
-
-    private int getDiagDLScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore = 0;
-        int humanScore = 0;
-        int xStart = x;
-        int yStart = y;
-        int xEnd = x;
-        int yEnd = y;
-        int possCombos;
-        if (startLater) {
-            xStart = x - seedsToWin + 1;
-            yStart = y + seedsToWin - 1;
-        } else
-            while (xStart != 0 && yStart != fieldSizeY - 1) {
-                --xStart;
-                ++yStart;
-            }
-        if (endEarlier) {
-            xEnd = x + seedsToWin - 1;
-            yEnd = y - seedsToWin + 1;
-        } else
-            while (xEnd != fieldSizeX - 1 && yEnd != 0) {
-                ++xEnd;
-                --yEnd;
-            }
-        possCombos = yStart - yEnd - seedsToWin + 2;
-//        System.out.printf("DL Diag: x: %d to %d;\ty: %d " +
-//                "to %d;\tDiag possible combos = %d\n",
-//                xStart, xEnd, yStart, yEnd, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[yStart - i - j][j + xStart + i] == ai_seed) ++aiScore;
-                if (field[yStart - i - j][j + xStart + i] == human_seed) ++humanScore;
-            }
-        }
-        return getScore(aiScore) - getScore(humanScore);
-    }
-    */
 }
