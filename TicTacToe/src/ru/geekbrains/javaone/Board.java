@@ -1,23 +1,28 @@
 package ru.geekbrains.javaone;
 
 public class Board {
-    private static final int MIN_SIZE = 3;          // минимальный замер поля по горизонтали/вертикали
-    private final char[] P_SEED = {'X', '0', '.'};  // символы для отображения на поле ходя 1 игрока, 2 игрока и пустой клетки
+    public static final int MIN_SIZE = 3;          // минимальный замер поля по горизонтали/вертикали
+    public static final char[] P_SEED = {'X', '0', '.'};   // символы для отображения на поле ходя 1, 2 игрока и пустой клетки
     public static final byte P1_SEED_I = 0;         // индекс символа 1 игрока массива P_SEED
     public static final byte P2_SEED_I = 1;         // индекс символа 2 игрока массива P_SEED
-    protected final byte EMPTY_SEED_I = 2;          // индекс символа пустой клетки массива P_SEED
+    public static final byte EMPTY_SEED_I = 2;      // индекс символа пустой клетки массива P_SEED
 
-    protected byte[][] field;     // массив, содержащий числовое представление игрового поля
-    protected int fieldSizeX;     // размер поля для игры по горизонтали
-    protected int fieldSizeY;     // размер поля для игры по вертикали
-    protected int seedsToWin;     // число символов подряд для выигрыша
-    protected int turnsCounter;   // число возможных ходов
-    protected byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
+    private byte[][] field;     // массив, содержащий числовое представление игрового поля
+    private int fieldSizeX;     // размер поля для игры по горизонтали
+    private int fieldSizeY;     // размер поля для игры по вертикали
+    private int seedsToWin;     // число символов подряд для выигрыша
+    private int turnsCounter;   // число возможных ходов
+    private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
 
     public Board() {
         this(MIN_SIZE, MIN_SIZE);
     }
 
+    /**
+     * Конструктор класса игрового поля для крестики-нолики
+     * @param fieldSizeX величина игрового поля по горизонтали
+     * @param fieldSizeY величина игрового поля по вертикали
+     */
     public Board(int fieldSizeX, int fieldSizeY) {
         this.fieldSizeX = fieldSizeX;
         this.fieldSizeY = fieldSizeY;
@@ -27,6 +32,10 @@ public class Board {
         initField();
     }
 
+    /**
+     * Заполнение игрового поля значениями "пустой клетки"
+     * <code>P_SEED[EMPTY_SEED_I] = '.'</code>
+     */
     private void initField() {
         for (int i = 0; i < fieldSizeY; ++i){
             for (int j = 0; j < fieldSizeX; ++j) {
@@ -35,8 +44,34 @@ public class Board {
         }
     }
 
+    /**
+     * Конструктор класса
+     * @param board
+     */
+    protected Board(Board board) {
+        fieldSizeX = board.getFieldSizeX();
+        fieldSizeY = board.getFieldSizeY();
+        field = new byte[fieldSizeY][fieldSizeX];
+        winnerIndex = -1;
+        seedsToWin = board.getSeedsToWin();
+    }
+
+    public byte[][] getField() { return field; }
+
+    public int getFieldSizeX() { return fieldSizeX; }
+
+    public int getFieldSizeY() { return fieldSizeY; }
+
+    public byte getWinnerIndex() {return winnerIndex; }
+
+    public int getSeedsToWin() { return seedsToWin; }
+
     public void setSeedsToWin() {
         seedsToWin = getMaxSeedsCount();
+    }
+
+    public int getMaxSeedsCount() {
+        return fieldSizeX > fieldSizeY ? fieldSizeY : fieldSizeX;
     }
 
     public boolean setSeedsToWin(int seedsToWin) {
@@ -47,6 +82,42 @@ public class Board {
             return false;
     }
 
+    public boolean isSeedsNumberValid(int seedsNumber) {
+        return seedsNumber >= MIN_SIZE &&
+                ((fieldSizeX > fieldSizeY) ? (seedsNumber <= fieldSizeY) : (seedsNumber <= fieldSizeX));
+    }
+
+    public static boolean isValidSize(int sizeX, int sizeY) {
+        return sizeX >= MIN_SIZE && sizeY >= MIN_SIZE;
+    }
+
+    public boolean isDraw() {
+        return turnsCounter == 0;
+    }
+
+    public int getTurnNumber() {
+        return fieldSizeX * fieldSizeY - turnsCounter;
+    }
+
+    public boolean isEmptyCell(int x, int y) {
+        return (isValidCoords(x, y)) ? field[y][x] == EMPTY_SEED_I : false;
+    }
+
+    public boolean isValidCoords(int x, int y) {
+        return  (x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY);
+    }
+
+    /**
+     *  Метод осуществляет проверку валидности хода и сам ход если все Ок
+     *
+     * @param x         координата хода по горизонтали
+     * @param y         координата хода по вертикали
+     * @param player    индекс для присвоения эдементу массива <code>field[][]</code>
+     *                  принимает значения <code>Board.P1_SEED_I</code>
+     *                  или <code>Board.P2_SEED_I</code>
+     * @return          true    ход валиден
+     *                  false   ход невалиден
+     */
     public boolean makeTurn(int x, int y, byte player) {
         if (isEmptyCell(x, y)) {
             field[y][x] = player;
@@ -57,6 +128,25 @@ public class Board {
             return false;
     }
 
+    /**
+     * Проверка на выигрыш текущего хода игрока с индексом <code>player</code>.
+     * Проверка проводится только на строке, столбце и диагоналях к которым
+     * принадлежит сделанный ход (т.е. проверяется не все поле)
+     *
+     * Строка/столбец/диагонали проверяются не полностью, а ограниченными отрезоками.
+     * Например, для выигрыша нужно 3 X подряд. После хода, строка/столбец/диагональ приняла вид:
+     * . . . X . . . . - в этом случае, проверяться будет только отрезок вида:
+     * . . X . . - то есть проверяться будут всего три комбинации, вместо шести.
+     * Таким образом, максимальная длина проверяемого отрезка будет равна
+     * <code>seedsToWin * 2 - 1</code>
+     *
+     * @param x         координата хода по горизонтали
+     * @param y         координата хода по вертикали
+     * @param player    индекс текущего игрока, принимает значения
+     *                  <code>Board.P1_SEED_I</code> или <code>Board.P2_SEED_I</code>
+     * @return          <code>player</code>  индекс текущего игрока, если был выигрыш
+     *                  -1    если выигрышная комбинация не была обнаружена
+     */
     protected byte getWinner(int x, int y, byte player) {
         boolean xStartLater = x - seedsToWin + 1 > 0;
         boolean yStartLater = y - seedsToWin + 1 > 0;
@@ -70,49 +160,119 @@ public class Board {
             return -1;
     }
 
+    /**
+     * Проверка на выигрыш горизонтального отрезка строки, к которой принадлежит текущий ход.
+     *
+     * @param x             координата хода по горизонтали
+     * @param y             координата хода по вертикали
+     * @param player        индекс текущего игрока, принимает значения
+     * @param startLater    true - отрезок начинается не с начала координат
+     *                      false - отрезок начинается с начала координат
+     * @param endEarlier    true - отрезок заканчивается не на границе поля
+     *                      false - отрезок заканчивается на границе поля
+     * @return              true - выигрышная комбинация была найдена
+     *                      false - выигрышная комбинация не была найдена
+     */
     private boolean checkRow(int x, int y, byte player, boolean startLater, boolean endEarlier) {
-        boolean rowCombo;
         int xStart = (startLater) ? x - seedsToWin + 1 : 0;
         int xEnd = (endEarlier) ? x + seedsToWin - 1 : fieldSizeX - 1;
         int possCombos = xEnd - xStart - seedsToWin + 2;
 //        System.out.printf("Row: x: %d to %d;\ty: %d;\t" +
 //                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            rowCombo = true;
-            for (int j = 0; j < seedsToWin; ++j) {
-                rowCombo &= field[y][j + xStart + i] == player;
-                if (!rowCombo) break;
-            }
-            if (rowCombo) return true;
+            // Для строки вида: X X X . . проверка заканчивается на первой итерации
+            if (rowLineCheck(y, xStart + i, player)) return true;
         }
         return false;
     }
 
-    private boolean checkCol(int x, int y, byte player, boolean startLater, boolean endLess) {
-        boolean colCombo;
+    /**
+     * Проверка на выигрыш горизонтального отрезка длиной <code>seedsToWin</code>
+     * Модификатор доступа объявлен как protected в связи с необходимостью
+     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     *
+     * @param y         координата отрезка по вертикали
+     * @param xStart    начало отрезка по горизонтали
+     * @param player    индекс для проверки выигрыша
+     * @return          true - выигрышная комбинация была найдена
+     *                  false - выигрышная комбинация не была найдена
+     */
+    protected boolean rowLineCheck(int y, int xStart, byte player) {
+        boolean rowCombo = true;
+        for (int i = 0; i < seedsToWin; ++i) {
+            rowCombo &= field[y][xStart + i] == player;
+            if (!rowCombo) break;   // если есть хоть одно несовпадение - можно прекращать проверку
+        }
+        return rowCombo;
+    }
+
+    /**
+     * Проверка на выигрыш вертикального отрезка строки, к которой принадлежит текущий ход.
+     *
+     * @param x             координата хода по горизонтали
+     * @param y             координата хода по вертикали
+     * @param player        индекс текущего игрока, принимает значения
+     * @param startLater    true - отрезок начинается не с начала координат
+     *                      false - отрезок начинается с начала координат
+     * @param endEarlier    true - отрезок заканчивается не на границе поля
+     *                      false - отрезок заканчивается на границе поля
+     * @return              true - выигрышная комбинация была найдена
+     *                      false - выигрышная комбинация не была найдена
+     */
+    private boolean checkCol(int x, int y, byte player, boolean startLater, boolean endEarlier) {
         int yStart = (startLater) ? y - seedsToWin + 1 : 0;
-        int yEnd = (endLess) ? y + seedsToWin - 1 : fieldSizeY - 1;
+        int yEnd = (endEarlier) ? y + seedsToWin - 1 : fieldSizeY - 1;
         int possCombos = yEnd - yStart - seedsToWin + 2;
 //        System.out.printf("Col: x: %d;\ty: %d to %d;\t" +
 //                "Col possible combos = %d\n", x, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            colCombo = true;
-            for (int j = 0; j < seedsToWin; ++j) {
-                colCombo &= field[j + yStart + i][x] == player;
-                if (!colCombo) break;
-            }
-            if (colCombo) return true;
+            if (colLineCheck(x, yStart + i, player)) return true;
         }
         return false;
     }
 
+    /**
+     * Проверка на выигрыш вертикального отрезка длиной <code>seedsToWin</code>
+     * Модификатор доступа объявлен как protected в связи с необходимостью
+     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     *
+     * @param x         координата отрезка по горизонтали
+     * @param yStart    начало отрезка по вертикали
+     * @param player    индекс для проверки выигрыша
+     * @return          true - выигрышная комбинация была найдена
+     *                  false - выигрышная комбинация не была найдена
+     */
+    protected boolean colLineCheck(int x, int yStart, byte player) {
+        boolean colCombo = true;
+        for (int i = 0; i < seedsToWin; ++i) {
+            colCombo &= field[yStart + i][x] == player;
+            if (!colCombo) break; // если есть хоть одно несовпадение - можно прекращать проверку
+        }
+        return colCombo;
+    }
+
+    /**
+     * Проверка на выигрыш диагонального отрезка строки, к которой принадлежит текущий ход.
+     * Диагональ лево-верх(UpLeft)- право-низ
+     *
+     * @param x             координата хода по горизонтали
+     * @param y             координата хода по вертикали
+     * @param player        индекс текущего игрока, принимает значения
+     * @param startLater    true - отрезок начинается не с начала координат
+     *                      по вертикали и горизонтали
+     *                      false - отрезок начинается с начала координат
+     *                      по вертикали и/или по горизонтали
+     * @param endEarlier    true - отрезок заканчивается не на границе поля
+     *                      по вертикали и горизонтали
+     *                      false - отрезок заканчивается на границе поля
+     *                      по вертикали и/или по горизонтали
+     * @return              true - выигрышная комбинация была найдена
+     *                      false - выигрышная комбинация не была найдена
+     */
     private boolean checkDiagUL(int x, int y, byte player, boolean startLater, boolean endEarlier) {
-        int xStart = x;
-        int yStart = y;
-        int xEnd = x;
-        int yEnd = y;
+        int xStart = x, xEnd = x;
+        int yStart = y, yEnd = y;
         int possCombos;
-        boolean diagCombo;
         if (startLater) {
             xStart = x - seedsToWin + 1;
             yStart = y - seedsToWin + 1;
@@ -134,23 +294,54 @@ public class Board {
 //                "to %d;\tDiag possible combos = %d\n",
 //                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            diagCombo = true;
-            for (int j = 0; j < seedsToWin; ++j) {
-                diagCombo &= field[j + yStart + i][j + xStart + i] == player;
-                if (!diagCombo) break;
-            }
-            if (diagCombo) return true;
+            if (ulDiagLineCheck(xStart + i, yStart + i, player)) return true;
         }
         return false;
     }
 
+    /**
+     * Проверка на выигрыш диагонального отрезка длиной <code>seedsToWin</code>
+     * Диагональ лево-верх(UpLeft)- право-низ
+     * Модификатор доступа объявлен как protected в связи с необходимостью
+     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     *
+     * @param xStart    начало отрезка по горизонтали
+     * @param yStart    начало отрезка по вертикали
+     * @param player    индекс для проверки выигрыша
+     * @return          true - выигрышная комбинация была найдена
+     *                  false - выигрышная комбинация не была найдена
+     */
+    protected boolean ulDiagLineCheck(int xStart, int yStart, byte player) {
+        boolean diagCombo = true;
+        for (int i = 0; i < seedsToWin; ++i) {
+            diagCombo &= field[yStart + i][xStart + i] == player;
+            if (!diagCombo) break; // если есть хоть одно несовпадение - можно прекращать проверку
+        }
+        return diagCombo;
+    }
+
+    /**
+     * Проверка на выигрыш диагонального отрезка строки, к которой принадлежит текущий ход.
+     * Диагональ лево-низ(DownLeft)- право-верх
+     *
+     * @param x             координата хода по горизонтали
+     * @param y             координата хода по вертикали
+     * @param player        индекс текущего игрока, принимает значения
+     * @param startLater    true - отрезок начинается не с начала координат
+     *                      по вертикали и горизонтали
+     *                      false - отрезок начинается с начала координат
+     *                      по вертикали и/или по горизонтали
+     * @param endEarlier    true - отрезок заканчивается не на границе поля
+     *                      по вертикали и горизонтали
+     *                      false - отрезок заканчивается на границе поля
+     *                      по вертикали и/или по горизонтали
+     * @return              true - выигрышная комбинация была найдена
+     *                      false - выигрышная комбинация не была найдена
+     */
     private boolean checkDiagDL(int x, int y, byte player, boolean startLater, boolean endEarlier) {
-        int xStart = x;
-        int yStart = y;
-        int xEnd = x;
-        int yEnd = y;
+        int xStart = x, xEnd = x;
+        int yStart = y, yEnd = y;
         int possCombos;
-        boolean diagCombo;
         if (startLater) {
             xStart = x - seedsToWin + 1;
             yStart = y + seedsToWin - 1;
@@ -172,16 +363,38 @@ public class Board {
 //                "to %d;\tDiag possible combos = %d\n",
 //                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            diagCombo = true;
-            for (int j = 0; j < seedsToWin; ++j) {
-                diagCombo &= field[yStart - i - j][j + xStart + i] == player;
-                if (!diagCombo) break;
-            }
-            if (diagCombo) return true;
+            if (dlDiagLineCheck(xStart + i, yStart - i, player)) return true;
         }
         return false;
     }
 
+    /**
+     * Проверка на выигрыш диагонального отрезка длиной <code>seedsToWin</code>
+     * Диагональ лево-низ(DownLeft)- право-верх
+     * Модификатор доступа объявлен как protected в связи с необходимостью
+     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     *
+     * @param xStart    начало отрезка по горизонтали
+     * @param yStart    начало отрезка по вертикали
+     * @param player    индекс для проверки выигрыша
+     * @return          true - выигрышная комбинация была найдена
+     *                  false - выигрышная комбинация не была найдена
+     */
+    protected boolean dlDiagLineCheck(int xStart, int yStart, byte player) {
+        boolean diagCombo = true;
+        for (int i = 0; i < seedsToWin; ++i) {
+            diagCombo &= field[yStart - i][xStart + i] == player;
+            if (!diagCombo) break; // если есть хоть одно несовпадение - можно прекращать проверку
+        }
+        return diagCombo;
+    }
+
+    /**
+     * Возвращает текущее состояние игрового поля в удоном
+     * для понимания виде
+     * @return  отформатированное содержимое игрового
+     *          поля <code>field[][]</code>
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -200,6 +413,12 @@ public class Board {
         return sb.toString();
     }
 
+    /**
+     * Возвращает текущее состояние игрового поля в удоном
+     * для понимания виде. Добавленыа табуляция и отступы между строками
+     * @return  отформатированное содержимое игрового
+     *          поля <code>field[][]</code>
+     */
     public String toStringBS() {
         StringBuilder sb = new StringBuilder();
         sb.append("  ");
@@ -212,58 +431,6 @@ public class Board {
             }
             sb.append("\n\n");
         }
-        sb.append("---");
-        for (int i = 1; i <= fieldSizeX; ++i) sb.append("--");
         return sb.toString();
     }
-
-    public static int getMinSize() { return MIN_SIZE; }
-
-    public int getFieldSizeX() {
-        return fieldSizeX;
-    }
-
-    public int getFieldSizeY() {
-        return fieldSizeY;
-    }
-
-    public int getSeedsToWin() {
-        return seedsToWin;
-    }
-
-    public byte getWinnerIndex() {
-        return winnerIndex;
-    }
-
-    public static boolean isValidSize(int sizeX, int sizeY) {
-        return sizeX >= MIN_SIZE && sizeY >= MIN_SIZE;
-    }
-
-    public int getMinSeedsCount() {
-        return MIN_SIZE;
-    }
-
-    public int getMaxSeedsCount() {
-        return fieldSizeX > fieldSizeY ? fieldSizeY : fieldSizeX;
-    }
-
-    public boolean isSeedsNumberValid(int seedsNumber) {
-        return seedsNumber >= MIN_SIZE && ((fieldSizeX > fieldSizeY) ? (seedsNumber <= fieldSizeY) : (seedsNumber <= fieldSizeX));
-    }
-
-    public boolean isValidCoords(int x, int y) {
-        return  (x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY);
-    }
-
-    public boolean isEmptyCell(int x, int y) {
-        if (isValidCoords(x, y))
-            return field[y][x] == EMPTY_SEED_I;
-        else
-            return false;
-    }
-
-    public boolean isDraw() {
-        return turnsCounter == 0;
-    }
-
 }

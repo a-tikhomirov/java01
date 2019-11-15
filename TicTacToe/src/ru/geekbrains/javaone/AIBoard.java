@@ -1,223 +1,197 @@
 package ru.geekbrains.javaone;
 
 public class AIBoard extends Board {
-    private static final int K_MAX = 1000;
-    private static final int K_MID = 100;
-    private static final int K_LOW = 10;
+    // Необхидимые поля родительского класса продублированы для сохранения уровня доступа private
+    private byte[][] field;     // массив, содержащий числовое представление игрового поля
+    private int fieldSizeX;     // размер поля для игры по горизонтали
+    private int fieldSizeY;     // размер поля для игры по вертикали
+    private int seedsToWin;     // число символов подряд для выигрыша
+    private int turnsCounter;   // число возможных ходов
+    private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
 
-    //public int score;
-    private byte ai_seed;
-    private byte human_seed;
-    private int turnScore;
+    private byte ai_seed;       // индекс ИИ - используется для подсчета веса хода
+    private byte human_seed;    // индекс игрока - используется для подсчета веса хода
+    private int[] koeff;        // массив коэффициентов - используется для подсчета веса хода
+    private int turnScore;      // текущий просчитанный вес хода
 
+    /**
+     *  Создание экземпляра класса AIBoard на основе Board
+     *
+     * @param board         игровая доска, на основе которой
+     *                      создается экспериментальная доска для ИИ
+     * @param ai_seed       индекс ИИ, принимает значения
+     *                      <code>Board.P1_SEED_I</code> или <code>Board.P2_SEED_I</code>
+     * @param human_seed    индекс игрока, принимает значения
+     *                      <code>Board.P1_SEED_I</code> или <code>Board.P2_SEED_I</code>
+     */
     public AIBoard(Board board, byte ai_seed, byte human_seed){
-        this(board);
+        super(board);
+        this.fieldSizeX = super.getFieldSizeX();
+        this.fieldSizeY = super.getFieldSizeY();
+        this.field = super.getField();
+        this.turnsCounter = fieldSizeX * fieldSizeY;
+        copyField(board.getField());
+        this.seedsToWin = super.getSeedsToWin();
+        this.winnerIndex = -1;
         this.ai_seed = ai_seed;
         this.human_seed = human_seed;
+        initKoefficients();
     }
 
-    public AIBoard(Board board) {
-        super(board.getFieldSizeX(), board.getFieldSizeY());
-        this.seedsToWin = board.getSeedsToWin();
-        copyField(board.field);
+    /**
+     * Копирование содержимого поля для игры доски Board в
+     * текущее поле для игры
+     * @param field поле для игры доски Board
+     */
+    private void copyField(byte[][] field) {
+        for (int i = 0; i < fieldSizeY; ++i){
+            for (int j = 0; j < fieldSizeX; ++j) {
+                this.field[i][j] = field[i][j];
+                if (this.field[i][j] != EMPTY_SEED_I)
+                    --turnsCounter;
+            }
+        }
     }
 
+    /**
+     *  Инициализация массива коэффициентов для расчета
+     *  веса хода
+     */
+    private void initKoefficients() {
+        koeff = new int[seedsToWin];
+        for (int i = seedsToWin - 1; i >= 0; --i) {
+            koeff[i] = (int) Math.pow(10, i + 1);
+        }
+    }
+
+    /**
+     * Вовзращает массива возможных ходов
+     * @return  возвращает <code>int[turnsCounter][2]</code>
+     *          где turnsCounter - число вомзожных ходов
+     */
+    public int[][] getPossibleTurns() {
+        if (winnerIndex != -1 || turnsCounter == 0) return null;
+        int[][] possibleMoves = new int[turnsCounter][2];
+        int movesCount = 0;
+        for (int i = 0; i < fieldSizeY; ++i) {
+            for (int j = 0; j < fieldSizeX; ++j) {
+                if (field[i][j] == EMPTY_SEED_I) {
+                    possibleMoves[movesCount][0] = j;
+                    possibleMoves[movesCount][1] = i;
+                    ++movesCount;
+                }
+            }
+        }
+        return possibleMoves;
+    }
+
+    /**
+     * Возвращает значение веса последнего хода
+     * @return  значение веса последнего сделанного хода
+     */
+    public int getTurnScore() {
+        return turnScore;
+    }
+
+    /**
+     *  Перегруженный метод родителя. Перегрузка требуется
+     *  в связи с необходимостью отмены ход и сброса счетчика веса
+     *
+     * @param x         координата хода по горизонтали
+     * @param y         координата хода по вертикали
+     * @param player    индекс для присвоения эдементу массива <code>field[][]</code>
+     *                  принимает значения <code>Board.P1_SEED_I</code>
+     *                  или <code>Board.P2_SEED_I</code> или <code>Board.EMPTY_SEED_I</code>
+     * @return          true    ход валиден
+     *                  false   ход невалиден
+     */
     @Override
     public boolean makeTurn(int x, int y, byte player) {
         if (isEmptyCell(x, y) || player == EMPTY_SEED_I) {
             field[y][x] = player;
             if (player == EMPTY_SEED_I) {
-                ++turnsCounter;
+                ++turnsCounter;             // если отмена хода, число возможных ходов увеличивается на 1
             } else {
-                --turnsCounter;
+                --turnsCounter;             // уменьшение числа возможных ходов
+                // сброс значения веса предыдущего хода для дальнейшего расчета в ходе выполнения метода getWinner
+                turnScore = 0;
+                // проверка на выигрыш текущего игрока и просчет веса текущего хода благодаря перегрузкам (см.ниже)
+                winnerIndex = getWinner(x, y,  player);
             }
-            winnerIndex = getWinner(x, y,  player);
-            turnScore = getScore(x, y);
             return true;
         } else
             return false;
     }
 
-    private void copyField(byte[][] field) {
-        for (int i = 0; i < fieldSizeY; ++i){
-            for (int j = 0; j < fieldSizeX; ++j) {
-                this.field[i][j] = field[i][j];
-                if (this.field[i][j] != EMPTY_SEED_I) --turnsCounter;
-            }
+    @Override
+    protected boolean rowLineCheck(int y, int xStart, byte player) {
+        boolean rowCombo = true;
+        int aiScore = 0;
+        int humanScore = 0;
+        for (int i = 0; i < seedsToWin; ++i) {
+            rowCombo &= field[y][xStart + i] == player;
+            if (field[y][xStart + i] == ai_seed) ++aiScore;
+            if (field[y][xStart + i] == human_seed) ++humanScore;
         }
+        turnScore = turnScore + countScore(aiScore) - countScore(humanScore);
+        return rowCombo;
     }
 
-    public int[][] getPossibleTurns() {
-        int[][] nextMoves = new int[turnsCounter][2]; // allocate List
-        int movesCount = 0;
-
-        // If gameover, i.e., no next move
-        if (winnerIndex != -1) {
-            return null;   // return empty list
+    @Override
+    protected boolean colLineCheck(int x, int yStart, byte player) {
+        boolean colCombo = true;
+        int aiScore = 0;
+        int humanScore = 0;
+        for (int i = 0; i < seedsToWin; ++i) {
+            colCombo &= field[yStart + i][x] == player;
+            if (field[yStart + i][x] == ai_seed) ++aiScore;
+            if (field[yStart + i][x] == human_seed) ++humanScore;
         }
-
-        // Search for empty cells and add to the List
-        for (int i = 0; i < fieldSizeY; i++) {
-            for (int j = 0; j < fieldSizeX; j++) {
-                if (field[i][j] == EMPTY_SEED_I) {
-                    nextMoves[movesCount][0] = j;
-                    nextMoves[movesCount][1] = i;
-                    movesCount++;
-                }
-            }
-        }
-        return nextMoves;
+        turnScore = turnScore + countScore(aiScore) - countScore(humanScore);
+        return colCombo;
     }
 
-    public int getTurnScore() {
-        return turnScore;
+    @Override
+    protected boolean ulDiagLineCheck(int xStart, int yStart, byte player) {
+        boolean diagCombo = true;
+        int aiScore = 0;
+        int humanScore = 0;
+        for (int i = 0; i < seedsToWin; ++i) {
+            diagCombo &= field[yStart + i][xStart + i] == player;
+            if (field[yStart + i][xStart + i] == ai_seed) ++aiScore;
+            if (field[yStart + i][xStart + i] == human_seed) ++humanScore;
+        }
+        turnScore = turnScore + countScore(aiScore) - countScore(humanScore);
+        return diagCombo;
     }
 
-    private int getScore(int x, int y) {
-        boolean xStartLater = x - seedsToWin + 1 > 0;
-        boolean yStartLater = y - seedsToWin + 1 > 0;
-        boolean xEndEarlier = x + seedsToWin < fieldSizeX;
-        boolean yEndEarlier = y + seedsToWin < fieldSizeY;
+    @Override
+    protected boolean dlDiagLineCheck(int xStart, int yStart, byte player) {
+        boolean diagCombo = true;
+        int aiScore = 0;
+        int humanScore = 0;
+        for (int i = 0; i < seedsToWin; ++i) {
+            diagCombo &= field[yStart - i][xStart + i] == player;
+            if (field[yStart - i][xStart + i] == ai_seed) ++aiScore;
+            if (field[yStart - i][xStart + i] == human_seed) ++humanScore;
+        }
+        turnScore = turnScore + countScore(aiScore) - countScore(humanScore);
+        return diagCombo;
+    }
+
+    /**
+     * Подсчет веса для строки/столбца/диагонали
+     * @param toCount количество идексов в строке/столбце/диагонали
+     *                размером <code>seedsToWin</code>
+     *                Например, для выигрыша нужно 3 X подряд,
+     *                проверяемая строка была вида: X . X - в этом
+     *                случае значение <code>toCount</code> равно 2
+     * @return  подсчиьанное значение веса
+     */
+    private int countScore(int toCount) {
         int score = 0;
-        //System.out.printf("x = %d;\ty = %d;\n", x, y);
-        score += getRowScore(x, y, xStartLater, xEndEarlier);
-        score += getColScore(x, y, yStartLater, yEndEarlier);
-        score += getDiagULScore(x, y, xStartLater && yStartLater, xEndEarlier && yEndEarlier);
-        score += getDiagDLScore(x, y, xStartLater && yEndEarlier, xEndEarlier && yStartLater);
-        return score;
-    }
-
-    private int getScore(int toCount) {
-        int score = 0;
-        if (toCount == seedsToWin) {
-            score += K_MAX;
-        } else if (toCount == seedsToWin - 1) {
-            score += K_MID;
-        } else if (toCount == seedsToWin - 2) {
-            score += K_LOW;
-        } else if (toCount != 0)
-            score++;
-        return score;
-    }
-
-
-    private int getRowScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore, humanScore;
-        int score = 0;
-        int xStart = (startLater) ? x - seedsToWin + 1 : 0;
-        int xEnd = (endEarlier) ? x + seedsToWin - 1 : fieldSizeX - 1;
-        int possCombos = xEnd - xStart - seedsToWin + 2;
-//        System.out.printf("Row: x: %d to %d;\ty: %d;\t" +
-//                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            aiScore = 0;
-            humanScore = 0;
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[y][j + xStart + i] == ai_seed) ++aiScore;
-                if (field[y][j + xStart + i] == human_seed) ++humanScore;
-            }
-            score = score + getScore(aiScore) - getScore(humanScore);
-        }
-        return score;
-    }
-
-    private int getColScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore, humanScore;
-        int score = 0;
-        int yStart = (startLater) ? y - seedsToWin + 1 : 0;
-        int yEnd = (endEarlier) ? y + seedsToWin - 1 : fieldSizeY - 1;
-        int possCombos = yEnd - yStart - seedsToWin + 2;
-//        System.out.printf("Col: x: %d;\ty: %d to %d;\t" +
-//                "Col possible combos = %d\n", x, yStart, yEnd, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            aiScore = 0;
-            humanScore = 0;
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[j + yStart + i][x] == ai_seed) ++aiScore;
-                if (field[j + yStart + i][x] == human_seed) ++humanScore;
-            }
-            score = score + getScore(aiScore) - getScore(humanScore);
-        }
-        return score;
-    }
-
-    private int getDiagULScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore, humanScore;
-        int score = 0;
-        int xStart = x;
-        int yStart = y;
-        int xEnd = x;
-        int yEnd = y;
-        int possCombos;
-        if (startLater) {
-            xStart = x - seedsToWin + 1;
-            yStart = y - seedsToWin + 1;
-        } else
-            while (xStart != 0 && yStart != 0) {
-                --xStart;
-                --yStart;
-            }
-        if (endEarlier) {
-            xEnd = x + seedsToWin - 1;
-            yEnd = y + seedsToWin - 1;
-        } else
-            while (xEnd != fieldSizeX - 1 && yEnd != fieldSizeY - 1) {
-                ++xEnd;
-                ++yEnd;
-            }
-        possCombos = yEnd - yStart - seedsToWin + 2;
-//        System.out.printf("UL Diag: x: %d to %d;\ty: %d " +
-//                "to %d;\tDiag possible combos = %d\n",
-//                xStart, xEnd, yStart, yEnd, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            aiScore = 0;
-            humanScore = 0;
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[j + yStart + i][j + xStart + i] == ai_seed) ++aiScore;
-                if (field[j + yStart + i][j + xStart + i] == human_seed) ++humanScore;
-            }
-            score = score + getScore(aiScore) - getScore(humanScore);
-        }
-        return score;
-    }
-
-    private int getDiagDLScore(int x, int y, boolean startLater, boolean endEarlier) {
-        int aiScore, humanScore;
-        int score = 0;
-        int xStart = x;
-        int yStart = y;
-        int xEnd = x;
-        int yEnd = y;
-        int possCombos;
-        if (startLater) {
-            xStart = x - seedsToWin + 1;
-            yStart = y + seedsToWin - 1;
-        } else
-            while (xStart != 0 && yStart != fieldSizeY - 1) {
-                --xStart;
-                ++yStart;
-            }
-        if (endEarlier) {
-            xEnd = x + seedsToWin - 1;
-            yEnd = y - seedsToWin + 1;
-        } else
-            while (xEnd != fieldSizeX - 1 && yEnd != 0) {
-                ++xEnd;
-                --yEnd;
-            }
-        possCombos = yStart - yEnd - seedsToWin + 2;
-//        System.out.printf("DL Diag: x: %d to %d;\ty: %d " +
-//                "to %d;\tDiag possible combos = %d\n",
-//                xStart, xEnd, yStart, yEnd, possCombos);
-        for (int i = 0; i < possCombos; ++i) {
-            aiScore = 0;
-            humanScore = 0;
-            for (int j = 0; j < seedsToWin; ++j) {
-                if (field[yStart - i - j][j + xStart + i] == ai_seed) ++aiScore;
-                if (field[yStart - i - j][j + xStart + i] == human_seed) ++humanScore;
-            }
-            score = score + getScore(aiScore) - getScore(humanScore);
-        }
+        for (int i = 0; i < koeff.length; ++i)
+            if (toCount == i + 1) score += koeff[i];
         return score;
     }
 }

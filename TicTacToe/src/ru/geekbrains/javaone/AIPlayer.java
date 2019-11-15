@@ -4,7 +4,7 @@ import java.util.Random;    // использвуется для генерац�
 
 public class AIPlayer {
     private static final Random RANDOM = new Random();              // используется для генерации псевдослучайных значений
-    private static final int[] DIFF = {0, 2, 3, 5, 6};
+    private static final int[] DIFF = {0, 2, 3, 6, 7};
 
     public static final int MIN_DIF = 0;
     public static final int MAX_DIF = DIFF.length - 1;
@@ -27,10 +27,16 @@ public class AIPlayer {
         this.difficulty = difficulty;
     }
 
+    public static boolean isValidDifficluty(int difficulty) {
+        return difficulty >= MIN_DIF && difficulty <= MAX_DIF;
+    }
+
     public int[] getXY(Board board) {
         aiBoard = new AIBoard(board, ai_seed, human_seed);
-        int[] move = (difficulty == DIFF[difficulty]) ?
+        int[] move = (difficulty == MIN_DIF) ?
                 randomTurn(board) : minimax(DIFF[difficulty], ai_seed, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        aiBoard = null;
+        //System.gc();
         return move;
     }
 
@@ -79,9 +85,5 @@ public class AIPlayer {
             }
         }
         return new int[] {bestCol, bestRow, (seed == ai_seed) ? alpha : beta};
-    }
-
-    public static boolean isValidDifficluty(int difficulty) {
-        return difficulty >= MIN_DIF && difficulty <= MAX_DIF;
     }
 }
