@@ -205,9 +205,20 @@ public class TicTacToe {
      */
     private static void aiTurn() {
         int[] coords = ai.getXY(gameBoard);
-        System.out.printf("%s ставит %s по координатам: %d, %d:\n",
-                AI, String.valueOf(Board.P_SEED[aiIndex]), (coords[0] + 1), (coords[1] + 1));
         gameBoard.makeTurn(coords[0], coords[1], aiIndex);
+    }
+
+    /**
+     * Вывод информацмм в консоль о последнем сделанном ходе
+     * @param isHuman   true - последний ход приналдежал человеку
+     *                  false -  последний ход приналдежал ИИ
+     */
+    private static void printTurnInfo(boolean isHuman) {
+        byte playerIndex = isHuman ? humanIndex : aiIndex;
+        int[] lastTurn = gameBoard.getLastTurn();
+        System.out.printf("%s ставит %s по координатам: %d, %d\n",
+                players[playerIndex], String.valueOf(Board.P_SEED[playerIndex]),
+                (lastTurn[0] + 1), lastTurn[0] + 1);
     }
 
     /**
@@ -223,8 +234,9 @@ public class TicTacToe {
             while (true) {
                 System.out.printf("Ход %d:\n", gameBoard.getTurnNumber() + 1);
                 nextTurn(isHumanTurn);
+                printTurnInfo(isHumanTurn);
                 //System.out.println(gameBoard.toString());
-                System.out.println(gameBoard.toStringBS());
+                System.out.print(gameBoard.toStringBS());
                 winnerIndex = gameBoard.getWinnerIndex();
                 if (winnerIndex != -1) {
                     System.out.printf("%s выиграл!\n", players[winnerIndex]);

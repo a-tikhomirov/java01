@@ -13,7 +13,11 @@ public class Board {
     private int seedsToWin;     // число символов подряд для выигрыша
     private int turnsCounter;   // число возможных ходов
     private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
+    private int[] lastTurn = new int[2];
 
+    /**
+     * Конструктор по умолчанию
+     */
     public Board() {
         this(MIN_SIZE, MIN_SIZE);
     }
@@ -45,10 +49,11 @@ public class Board {
     }
 
     /**
-     * Конструктор класса
-     * @param board
+     * Конструктор класса на основе имеющегося игрового поля
+     * крестики-нолики
+     * @param board экземпляр класса <code>Board</code>
      */
-    protected Board(Board board) {
+    protected Board(Board board ) {
         fieldSizeX = board.getFieldSizeX();
         fieldSizeY = board.getFieldSizeY();
         field = new byte[fieldSizeY][fieldSizeX];
@@ -66,14 +71,14 @@ public class Board {
 
     public int getSeedsToWin() { return seedsToWin; }
 
-    public void setSeedsToWin() {
-        seedsToWin = getMaxSeedsCount();
-    }
+    public int[] getLastTurn() { return lastTurn; }
 
-    public int getMaxSeedsCount() {
-        return fieldSizeX > fieldSizeY ? fieldSizeY : fieldSizeX;
-    }
-
+    /**
+     * Установка параметра <code>seedsToWin</code>
+     * @param seedsToWin    число символов подряд для выигрыша
+     * @return              true - число валидно, параметр установлен
+     *                      false - число не валидно, параметр не установлен
+     */
     public boolean setSeedsToWin(int seedsToWin) {
         if (isSeedsNumberValid(seedsToWin)) {
             this.seedsToWin = seedsToWin;
@@ -82,27 +87,76 @@ public class Board {
             return false;
     }
 
-    public boolean isSeedsNumberValid(int seedsNumber) {
-        return seedsNumber >= MIN_SIZE &&
-                ((fieldSizeX > fieldSizeY) ? (seedsNumber <= fieldSizeY) : (seedsNumber <= fieldSizeX));
+    public void setSeedsToWin() {
+        seedsToWin = getMaxSeedsCount();
     }
 
+    /**
+     * Вовзращает максимальное число символов подряд для выигрыша
+     * для заданной игровой доски
+     * @return максимальное число символов подряд для выигрыша
+     */
+    public int getMaxSeedsCount() {
+        return fieldSizeX > fieldSizeY ? fieldSizeY : fieldSizeX;
+    }
+
+    /**
+     * Проверка заданного числа символов подряд для выигрыша на валидность
+     * @param seedsNumber   числа символов подряд для выигрыша для проверки
+     * @return              true - заданное число валидно
+     *                      false - заданное число не валидно
+     */
+    public boolean isSeedsNumberValid(int seedsNumber) {
+        return seedsNumber >= MIN_SIZE && seedsToWin <= getMaxSeedsCount();
+    }
+
+    /**
+     * Проверка заданных размеров игрового поля на валидность
+     * @param sizeX размер поля по горизонтали для проверки
+     * @param sizeY размер поля по вертикали для проверки
+     * @return      true - заданные размеры валидны
+     *              false - заданные размеры не валидны
+     */
     public static boolean isValidSize(int sizeX, int sizeY) {
         return sizeX >= MIN_SIZE && sizeY >= MIN_SIZE;
     }
 
+    /**
+     * Проверка на ничью. Если число возможных ходов равно нулю
+     * и индекс победителя не определен - ничья
+     * @return  true - ничья
+     *          false - еще есть возможные ходы
+     */
     public boolean isDraw() {
-        return turnsCounter == 0;
+        return turnsCounter == 0 && winnerIndex == -1;
     }
 
+    /**
+     * Возвращает текущий ход
+     * @return  номер текущего хода
+     */
     public int getTurnNumber() {
         return fieldSizeX * fieldSizeY - turnsCounter;
     }
 
+    /**
+     * Метод проверяет свободна ли ячейка с заданными координатами
+     * @param x координата ячейки по горизонтали
+     * @param y координата ячейки по вертикали
+     * @return  true - координаты валидны и ячейка свободна
+     *          false - координаты не валидны или ячейка занята
+     */
     public boolean isEmptyCell(int x, int y) {
-        return (isValidCoords(x, y)) ? field[y][x] == EMPTY_SEED_I : false;
+        return (isValidCoords(x, y)) && field[y][x] == EMPTY_SEED_I;
     }
 
+    /**
+     * Проверка заданных координат на валидность
+     * @param x координата по горизонтали
+     * @param y координата по вертикали
+     * @return  true - координаты валидны
+     *          false - координаты не валидны
+     */
     public boolean isValidCoords(int x, int y) {
         return  (x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY);
     }
@@ -115,11 +169,13 @@ public class Board {
      * @param player    индекс для присвоения эдементу массива <code>field[][]</code>
      *                  принимает значения <code>Board.P1_SEED_I</code>
      *                  или <code>Board.P2_SEED_I</code>
-     * @return          true    ход валиден
-     *                  false   ход невалиден
+     * @return          true    ход валидени совершен
+     *                  false   ход не валиден и не совершен
      */
     public boolean makeTurn(int x, int y, byte player) {
         if (isEmptyCell(x, y)) {
+            lastTurn[0] = x;
+            lastTurn[1] = y;
             field[y][x] = player;
             --turnsCounter;
             winnerIndex = getWinner(x, y,  player);
@@ -135,8 +191,8 @@ public class Board {
      *
      * Строка/столбец/диагонали проверяются не полностью, а ограниченными отрезоками.
      * Например, для выигрыша нужно 3 X подряд. После хода, строка/столбец/диагональ приняла вид:
-     * . . . X . . . . - в этом случае, проверяться будет только отрезок вида:
-     * . . X . . - то есть проверяться будут всего три комбинации, вместо шести.
+     * [. . . X . . . .] - в этом случае, проверяться будет только отрезок вида:
+     * .[. . X . .]. . - то есть проверяться будут всего три комбинации, вместо шести.
      * Таким образом, максимальная длина проверяемого отрезка будет равна
      * <code>seedsToWin * 2 - 1</code>
      *
@@ -180,7 +236,7 @@ public class Board {
 //        System.out.printf("Row: x: %d to %d;\ty: %d;\t" +
 //                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            // Для строки вида: X X X . . проверка заканчивается на первой итерации
+            // Для отрезка вида: [X X X . .] проверка завершится на первой итерации (если нужно 3 X подряд)
             if (rowLineCheck(y, xStart + i, player)) return true;
         }
         return false;
@@ -189,7 +245,7 @@ public class Board {
     /**
      * Проверка на выигрыш горизонтального отрезка длиной <code>seedsToWin</code>
      * Модификатор доступа объявлен как protected в связи с необходимостью
-     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     * переопределения метода в классе-наследнике (для расчета веса хода)
      *
      * @param y         координата отрезка по вертикали
      * @param xStart    начало отрезка по горизонтали
@@ -201,7 +257,8 @@ public class Board {
         boolean rowCombo = true;
         for (int i = 0; i < seedsToWin; ++i) {
             rowCombo &= field[y][xStart + i] == player;
-            if (!rowCombo) break;   // если есть хоть одно несовпадение - можно прекращать проверку
+            // для отрезка вида [. X .] - проверка завершится на первой итерации
+            if (!rowCombo) break;
         }
         return rowCombo;
     }
@@ -234,7 +291,7 @@ public class Board {
     /**
      * Проверка на выигрыш вертикального отрезка длиной <code>seedsToWin</code>
      * Модификатор доступа объявлен как protected в связи с необходимостью
-     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     * переопределения метода в классе-наследнике (для расчета веса хода)
      *
      * @param x         координата отрезка по горизонтали
      * @param yStart    начало отрезка по вертикали
@@ -303,7 +360,7 @@ public class Board {
      * Проверка на выигрыш диагонального отрезка длиной <code>seedsToWin</code>
      * Диагональ лево-верх(UpLeft)- право-низ
      * Модификатор доступа объявлен как protected в связи с необходимостью
-     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     * переопределения метода в классе-наследнике (для расчета веса хода)
      *
      * @param xStart    начало отрезка по горизонтали
      * @param yStart    начало отрезка по вертикали
@@ -372,7 +429,7 @@ public class Board {
      * Проверка на выигрыш диагонального отрезка длиной <code>seedsToWin</code>
      * Диагональ лево-низ(DownLeft)- право-верх
      * Модификатор доступа объявлен как protected в связи с необходимостью
-     * перегрузки метода в классе-наследнике (для расчета веса хода)
+     * переопределения метода в классе-наследнике (для расчета веса хода)
      *
      * @param xStart    начало отрезка по горизонтали
      * @param yStart    начало отрезка по вертикали
@@ -415,7 +472,7 @@ public class Board {
 
     /**
      * Возвращает текущее состояние игрового поля в удоном
-     * для понимания виде. Добавленыа табуляция и отступы между строками
+     * для понимания виде. Добавлена табуляция и отступы между строками
      * @return  отформатированное содержимое игрового
      *          поля <code>field[][]</code>
      */
