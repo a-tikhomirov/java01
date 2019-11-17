@@ -1,2 +1,4 @@
 #!/bin/bash
+#switches output btw PC and HDMI
+#VLC audio set to ALSA, video to OpenGL
 Another script
