@@ -1,0 +1,4 @@
+#!/bin/bbaSh
+#mounts NAS Drives on network up
+#/etc/network/if-up.d/mntZdrives
+Here comes the script_bash
