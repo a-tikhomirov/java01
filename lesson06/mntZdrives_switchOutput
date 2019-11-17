@@ -2,4 +2,6 @@
 #mounts NAS Drives on network up
 #/etc/network/if-up.d/mntZdrives
 Here comes the script_bash#!/bin/bash
+#switches output btw PC and HDMI
+#VLC audio set to ALSA, video to OpenGL
 Another script
