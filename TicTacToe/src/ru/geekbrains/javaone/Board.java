@@ -6,6 +6,8 @@ public class Board {
     public static final byte P1_SEED_I = 0;         // индекс символа 1 игрока массива P_SEED
     public static final byte P2_SEED_I = 1;         // индекс символа 2 игрока массива P_SEED
     public static final byte EMPTY_SEED_I = 2;      // индекс символа пустой клетки массива P_SEED
+    // массив "направлений" линий на поле игры, для проверки на наличие выигрышной комбинации
+    public static final int[][] DIRS = {{1, 0}, {0, 1},{1, 1}, {1, -1}};
 
     private byte[][] field;     // массив, содержащий числовое представление игрового поля
     private int fieldSizeX;     // размер поля для игры по горизонтали
@@ -13,7 +15,7 @@ public class Board {
     private int seedsToWin;     // число символов подряд для выигрыша
     private int turnsCounter;   // число возможных ходов
     private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
-    private int[] lastTurn = new int[2];
+    private int[] lastTurn = new int[2];    // хранит последний сделанный ход
 
     /**
      * Конструктор по умолчанию
@@ -189,6 +191,10 @@ public class Board {
      * Проверка проводится только на строке, столбце и диагоналях к которым
      * принадлежит сделанный ход (т.е. проверяется не все поле)
      *
+     * Проверка разделена на 4 проверки, т.к. для строки/столбца/диагоналей,
+     * к которым принадлежит сделанный ход, будут разные координаты начал отрезков и
+     * возможны разные длины отрезков.
+     *
      * Строка/столбец/диагонали проверяются не полностью, а ограниченными отрезоками.
      * Например, для выигрыша нужно 3 X подряд. После хода, строка/столбец/диагональ приняла вид:
      * [. . . X . . . .] - в этом случае, проверяться будет только отрезок вида:
@@ -237,30 +243,10 @@ public class Board {
 //                "Row possible combos = %d\n", xStart, xEnd, y, possCombos);
         for (int i = 0; i < possCombos; ++i) {
             // Для отрезка вида: [X X X . .] проверка завершится на первой итерации (если нужно 3 X подряд)
-            if (rowLineCheck(y, xStart + i, player)) return true;
+            if (checkLine(xStart + i, y, DIRS[0][0], DIRS[0][1], seedsToWin, player))
+                return true;
         }
         return false;
-    }
-
-    /**
-     * Проверка на выигрыш горизонтального отрезка длиной <code>seedsToWin</code>
-     * Модификатор доступа объявлен как protected в связи с необходимостью
-     * переопределения метода в классе-наследнике (для расчета веса хода)
-     *
-     * @param y         координата отрезка по вертикали
-     * @param xStart    начало отрезка по горизонтали
-     * @param player    индекс для проверки выигрыша
-     * @return          true - выигрышная комбинация была найдена
-     *                  false - выигрышная комбинация не была найдена
-     */
-    protected boolean rowLineCheck(int y, int xStart, byte player) {
-        boolean rowCombo = true;
-        for (int i = 0; i < seedsToWin; ++i) {
-            rowCombo &= field[y][xStart + i] == player;
-            // для отрезка вида [. X .] - проверка завершится на первой итерации
-            if (!rowCombo) break;
-        }
-        return rowCombo;
     }
 
     /**
@@ -283,29 +269,10 @@ public class Board {
 //        System.out.printf("Col: x: %d;\ty: %d to %d;\t" +
 //                "Col possible combos = %d\n", x, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            if (colLineCheck(x, yStart + i, player)) return true;
+            if (checkLine(x, yStart + i, DIRS[1][0], DIRS[1][1], seedsToWin, player))
+                return true;
         }
         return false;
-    }
-
-    /**
-     * Проверка на выигрыш вертикального отрезка длиной <code>seedsToWin</code>
-     * Модификатор доступа объявлен как protected в связи с необходимостью
-     * переопределения метода в классе-наследнике (для расчета веса хода)
-     *
-     * @param x         координата отрезка по горизонтали
-     * @param yStart    начало отрезка по вертикали
-     * @param player    индекс для проверки выигрыша
-     * @return          true - выигрышная комбинация была найдена
-     *                  false - выигрышная комбинация не была найдена
-     */
-    protected boolean colLineCheck(int x, int yStart, byte player) {
-        boolean colCombo = true;
-        for (int i = 0; i < seedsToWin; ++i) {
-            colCombo &= field[yStart + i][x] == player;
-            if (!colCombo) break; // если есть хоть одно несовпадение - можно прекращать проверку
-        }
-        return colCombo;
     }
 
     /**
@@ -351,30 +318,10 @@ public class Board {
 //                "to %d;\tDiag possible combos = %d\n",
 //                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            if (ulDiagLineCheck(xStart + i, yStart + i, player)) return true;
+            if (checkLine(xStart + i, yStart + i, DIRS[2][0], DIRS[2][1], seedsToWin, player))
+                return true;
         }
         return false;
-    }
-
-    /**
-     * Проверка на выигрыш диагонального отрезка длиной <code>seedsToWin</code>
-     * Диагональ лево-верх(UpLeft)- право-низ
-     * Модификатор доступа объявлен как protected в связи с необходимостью
-     * переопределения метода в классе-наследнике (для расчета веса хода)
-     *
-     * @param xStart    начало отрезка по горизонтали
-     * @param yStart    начало отрезка по вертикали
-     * @param player    индекс для проверки выигрыша
-     * @return          true - выигрышная комбинация была найдена
-     *                  false - выигрышная комбинация не была найдена
-     */
-    protected boolean ulDiagLineCheck(int xStart, int yStart, byte player) {
-        boolean diagCombo = true;
-        for (int i = 0; i < seedsToWin; ++i) {
-            diagCombo &= field[yStart + i][xStart + i] == player;
-            if (!diagCombo) break; // если есть хоть одно несовпадение - можно прекращать проверку
-        }
-        return diagCombo;
     }
 
     /**
@@ -420,35 +367,35 @@ public class Board {
 //                "to %d;\tDiag possible combos = %d\n",
 //                xStart, xEnd, yStart, yEnd, possCombos);
         for (int i = 0; i < possCombos; ++i) {
-            if (dlDiagLineCheck(xStart + i, yStart - i, player)) return true;
+            if (checkLine(xStart + i, yStart - i, DIRS[3][0], DIRS[3][1], seedsToWin, player))
+                return true;
         }
         return false;
     }
 
     /**
-     * Проверка на выигрыш диагонального отрезка длиной <code>seedsToWin</code>
-     * Диагональ лево-низ(DownLeft)- право-верх
-     * Модификатор доступа объявлен как protected в связи с необходимостью
-     * переопределения метода в классе-наследнике (для расчета веса хода)
-     *
+     * Проверка отрезка заданной длины на наличие выигрышной комбинации
      * @param xStart    начало отрезка по горизонтали
      * @param yStart    начало отрезка по вертикали
-     * @param player    индекс для проверки выигрыша
-     * @return          true - выигрышная комбинация была найдена
-     *                  false - выигрышная комбинация не была найдена
+     * @param dirX      множитель смещения отрезка по горизонтали
+     * @param dirY      множитель смещения отрезка по вертикали
+     * @param lienLen   длина отрезка
+     * @param seed      индекс игрока для проверки на выигрыш
+     * @return          true - на заданном отрезке выигрышная комбинация
+     *                  false - на заданном отрезке нет выигрышной комбинации
      */
-    protected boolean dlDiagLineCheck(int xStart, int yStart, byte player) {
-        boolean diagCombo = true;
-        for (int i = 0; i < seedsToWin; ++i) {
-            diagCombo &= field[yStart - i][xStart + i] == player;
-            if (!diagCombo) break; // если есть хоть одно несовпадение - можно прекращать проверку
+    private boolean checkLine(int xStart, int yStart, int dirX, int dirY, int lienLen, byte seed) {
+        boolean lineCombo = true;
+        for (int i = 0; i < lienLen; ++i) {
+            lineCombo &= field[yStart + i * dirY][xStart + i * dirX] == seed;
+            if (!lineCombo) break; // если есть хоть одно несовпадение - можно прекращать проверку
         }
-        return diagCombo;
+        return lineCombo;
     }
 
     /**
-     * Возвращает текущее состояние игрового поля в удоном
-     * для понимания виде
+     * Возвращает текущее состояние игрового поля в удобном
+     * для отображения виде
      * @return  отформатированное содержимое игрового
      *          поля <code>field[][]</code>
      */
@@ -472,7 +419,7 @@ public class Board {
 
     /**
      * Возвращает текущее состояние игрового поля в удоном
-     * для понимания виде. Добавлена табуляция и отступы между строками
+     * для отображения виде. Добавлена табуляция и отступы между строками
      * @return  отформатированное содержимое игрового
      *          поля <code>field[][]</code>
      */

@@ -218,7 +218,7 @@ public class TicTacToe {
         int[] lastTurn = gameBoard.getLastTurn();
         System.out.printf("%s ставит %s по координатам: %d, %d\n",
                 players[playerIndex], String.valueOf(Board.P_SEED[playerIndex]),
-                (lastTurn[0] + 1), lastTurn[0] + 1);
+                (lastTurn[0] + 1), lastTurn[1] + 1);
     }
 
     /**
