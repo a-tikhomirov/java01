@@ -9,8 +9,8 @@ public class Lesson06HW {
      * @param file1 путь/имя первого файла для склеивания
      * @param file2 путь/имя второго файла для склеивания
      * @param combinedFile  путь/имя к создаваемому склеенному файлу
-     * @return      0 - склеивание было успешно
-     *              -1 - произошла ошибка
+     * @return      true - склеивание было успешно
+     *              false - произошла ошибка
      */
     private static boolean combineFiles(String file1, String file2, String combinedFile) {
         try {
