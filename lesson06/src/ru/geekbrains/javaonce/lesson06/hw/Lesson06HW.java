@@ -1,6 +1,7 @@
 package ru.geekbrains.javaonce.lesson06.hw;
 
 import java.io.*;
+import java.nio.file.*;
 
 public class Lesson06HW {
 
@@ -131,6 +132,32 @@ public class Lesson06HW {
         return sb.toString();
     }
 
+    //1 вариант: используем класс файл
+    // сразу ищет слово при прочтении файла
+    private static boolean readLine (String fileName, String word) {
+        try {
+            return new String(Files.readAllBytes(Paths.get(fileName))).contains(word);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    //склейка двух файлов при прочтении второго, сразу записывая символы в конец первого
+    //при желании как файл1 можно указать пустой файл и вызвать метод 2 раза, передавая
+    //как файл2 другие 2 файла в нужной последовательности
+    //склеится по сути также
+    private static void splice (String fileA, String fileB) {
+        try (FileOutputStream fos = new FileOutputStream(fileA, true); FileInputStream fin = new FileInputStream(fileB)){
+            int i;
+            while ((i = fin.read()) != -1) {
+                fos.write(i);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         String file1 = "mntZdrives";
         String file2 = "switchOutput";
@@ -142,10 +169,19 @@ public class Lesson06HW {
         sb.append("_");
         sb.append(file2);
         // склеивание двух файлов
-        System.out.println(combineFiles(file1, file2, sb.toString()) ? "Files combined\n" : "something wrong\n");
+        //System.out.println(combineFiles(file1, file2, sb.toString()) ? "Files combined\n" : "something wrong\n");
 
+        long startTime = System.nanoTime();
         // поиск строки в файле
         System.out.printf("String \"%s\" in file \"%s\" founded - %s\n\n", str, file1, isStrInFile(str, file1));
+        float delta = (System.nanoTime() - startTime) * 0.000000001f;
+        System.out.printf("%f sec\n\n", delta);
+
+        startTime = System.nanoTime();
+        // поиск строки в файле
+        System.out.printf("String \"%s\" in file \"%s\" founded - %s\n\n", str, file1, readLine(file1, str));
+        delta = (System.nanoTime() - startTime) * 0.000000001f;
+        System.out.printf("%f sec\n\n", delta);
 
         // поиск строки в папке
         System.out.printf("Results of checking String \"%s\" in directory \"%s\" are:\n%s", str, dir, checkStrInDir(str, dir));
