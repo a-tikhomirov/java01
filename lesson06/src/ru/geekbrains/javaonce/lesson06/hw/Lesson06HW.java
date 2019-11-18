@@ -53,7 +53,7 @@ public class Lesson06HW {
      * @return      true - строка найдена в файле
      *              false - строка не найдена в файле
      */
-    private static boolean isStrInDir(String str, String file) {
+    private static boolean isStrInFile(String str, String file) {
         try {
             FileInputStream fin = new FileInputStream(file);
             return isByteArrInStream(str.getBytes(), fin);
@@ -120,7 +120,7 @@ public class Lesson06HW {
                 if (!file.isDirectory()) {
                     sb.append(file.getPath() + " string \"");
                     sb.append(str + "\" ");
-                    sb.append((isStrInDir(str, file.getPath())) ? "founded" : "-");
+                    sb.append((isStrInFile(str, file.getPath())) ? "founded" : "-");
                     sb.append("\n");
                 }
             }
@@ -145,7 +145,7 @@ public class Lesson06HW {
         System.out.println(combineFiles(file1, file2, sb.toString()) ? "Files combined\n" : "something wrong\n");
 
         // поиск строки в файле
-        System.out.printf("String \"%s\" in file \"%s\" founded - %s\n\n", str, file1, isStrInDir(str, file1));
+        System.out.printf("String \"%s\" in file \"%s\" founded - %s\n\n", str, file1, isStrInFile(str, file1));
 
         // поиск строки в папке
         System.out.printf("Results of checking String \"%s\" in directory \"%s\" are:\n%s", str, dir, checkStrInDir(str, dir));
