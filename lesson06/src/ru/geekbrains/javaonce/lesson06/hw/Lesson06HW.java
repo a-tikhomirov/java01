@@ -1,9 +1,6 @@
 package ru.geekbrains.javaonce.lesson06.hw;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.File;
+import java.io.*;
 
 public class Lesson06HW {
 
@@ -11,20 +8,16 @@ public class Lesson06HW {
      * Метод склеивает побайтно два файла
      * @param file1 путь/имя первого файла для склеивания
      * @param file2 путь/имя второго файла для склеивания
+     * @param combinedFile  путь/имя к создаваемому склеенному файлу
      * @return      0 - склеивание было успешно
      *              -1 - произошла ошибка
      */
-    private static int combineFiles(String file1, String file2) {
+    private static boolean combineFiles(String file1, String file2, String combinedFile) {
         try {
             FileInputStream fin1 = new FileInputStream(file1);
             FileInputStream fin2 = new FileInputStream(file2);
 
-            StringBuilder sbCombinedFile = new StringBuilder();
-            sbCombinedFile.append(file1);
-            sbCombinedFile.append("_");
-            sbCombinedFile.append(file2);
-
-            FileOutputStream fout = new FileOutputStream(sbCombinedFile.toString());
+            FileOutputStream fout = new FileOutputStream(combinedFile);
 
             readWrite(fin1, fout);
             readWrite(fin2, fout);
@@ -34,9 +27,9 @@ public class Lesson06HW {
             fout.close();
         } catch (IOException e) {
             e.printStackTrace();
-            return -1;
+            return false;
         }
-        return 0;
+        return true;
     }
 
     /**
@@ -144,8 +137,12 @@ public class Lesson06HW {
         String str = "bash";
         String dir = ".";
 
+        StringBuilder sb = new StringBuilder();
+        sb.append(file1);
+        sb.append("_");
+        sb.append(file2);
         // склеивание двух файлов
-        System.out.println(combineFiles(file1, file2) == 0 ? "Files combined\n" : "something wrong\n");
+        System.out.println(combineFiles(file1, file2, sb.toString()) ? "Files combined\n" : "something wrong\n");
 
         // поиск строки в файле
         System.out.printf("String \"%s\" in file \"%s\" founded - %s\n\n", str, file1, isStrInDir(str, file1));
