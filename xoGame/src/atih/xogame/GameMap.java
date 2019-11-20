@@ -74,6 +74,7 @@ public class GameMap extends JPanel {
         this.difficulty = difficulty;
         initMap();
         isIntialized = true;
+        repaint();
         // добавить методы для обеспечения игры
     }
 
