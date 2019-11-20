@@ -89,11 +89,11 @@ public class GameMap extends JPanel {
         if (cellWidth > cellHeigth) {
             gameWindow.reSize((cellHeigth - cellWidth)*fieldSizeX, 0);
             cellSize = cellHeigth;
-        }
-        if (cellHeigth > cellWidth) {
+        } else if (cellHeigth > cellWidth) {
             gameWindow.reSize(0, (cellWidth - cellHeigth)*fieldSizeY);
             cellSize = cellWidth;
-        }
+        } else
+            cellSize = cellWidth;
     }
 
     /**
