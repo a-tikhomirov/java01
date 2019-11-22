@@ -4,8 +4,6 @@ import java.util.ArrayList; // для возможности использов�
 import java.util.List;      // для возможности использования List<int[]>
 
 public class AIBoard extends Board {
-
-
     // Необходимые поля родительского класса продублированы для сохранения уровня доступа private
     private byte[][] field;     // массив, содержащий числовое представление игрового поля
     private int fieldSizeX;     // размер поля для игры по горизонтали
@@ -13,11 +11,11 @@ public class AIBoard extends Board {
     private int seedsToWin;     // число символов подряд для выигрыша
     private int turnsCounter;   // число возможных ходов
     private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
+    private int[] lastTurn;     // хранит последний сделанный ход
 
     private byte ai_seed;       // индекс ИИ - используется для подсчета веса хода
     private byte human_seed;    // индекс игрока - используется для подсчета веса хода
     private int[] koeff;        // массив коэффициентов - используется для подсчета веса хода
-    private int[] lastTurn = new int[2];    // хранит последний сделанный ход
 
     /**
      *  Создание экземпляра класса AIBoard на основе Board
@@ -31,31 +29,28 @@ public class AIBoard extends Board {
      */
     public AIBoard(Board board, byte ai_seed, byte human_seed){
         super(board);
-        this.fieldSizeX = super.getFieldSizeX();
-        this.fieldSizeY = super.getFieldSizeY();
-        this.field = super.getField();
-        this.turnsCounter = fieldSizeX * fieldSizeY;
-        copyField(board.getField());
-        this.seedsToWin = super.getSeedsToWin();
-        this.lastTurn[0] = board.getLastTurn()[0];
-        this.lastTurn[1] = board.getLastTurn()[1];
-        this.winnerIndex = -1;
+        fieldSizeX = super.getFieldSizeX();
+        fieldSizeY = super.getFieldSizeY();
+        field = super.getField();
+        seedsToWin = super.getSeedsToWin();
+        winnerIndex = -1;
+        lastTurn = new int[2];
         this.ai_seed = ai_seed;
         this.human_seed = human_seed;
         initKoefficients();
+        //copyData(board);
     }
 
     /**
-     * Копирование содержимого поля для игры доски Board в
+     * Копирование данных поля для игры доски Board в
      * текущее поле для игры
-     * @param field поле для игры доски Board
+     * @param board поле для игры доски Board
      */
-    private void copyField(byte[][] field) {
+    public void copyData(Board board, byte[][] field) {
+        turnsCounter = board.getTurnsCounter();
         for (int i = 0; i < fieldSizeY; ++i){
             for (int j = 0; j < fieldSizeX; ++j) {
                 this.field[i][j] = field[i][j];
-                if (this.field[i][j] != EMPTY_SEED_I)
-                    --turnsCounter;
             }
         }
     }
@@ -88,20 +83,9 @@ public class AIBoard extends Board {
      */
     public List<int[]> getPossibleTurns() {
         if (winnerIndex != -1 || turnsCounter == 0) return null;
-        int lastTurnX = getLastTurn()[0];
-        int lastTurnY = getLastTurn()[1];
-        int xStart = (lastTurnX - seedsToWin + 1 > 0) ?
-                lastTurnX - seedsToWin + 1 : 0;
-        int yStart = (lastTurnY - seedsToWin + 1 > 0) ?
-                lastTurnY - seedsToWin + 1 : 0;
-        int xEnd = (lastTurnX + seedsToWin < fieldSizeX) ?
-                lastTurnX + seedsToWin - 1 : fieldSizeX - 1;
-        int yEnd = (lastTurnY + seedsToWin < fieldSizeY) ?
-                lastTurnY + seedsToWin - 1 : fieldSizeY - 1;
-        //int[][] possibleMoves = new int[][2];
         List<int[]> possibleMoves = new ArrayList<int[]>();
-        for (int i = yStart; i <= yEnd; ++i) {
-            for (int j = xStart; j <= xEnd; ++j) {
+        for (int i = 0; i < fieldSizeY; ++i) {
+            for (int j = 0; j < fieldSizeX; ++j) {
                 if (field[i][j] == EMPTY_SEED_I) {
                     possibleMoves.add(new int[] {j, i});
                 }
@@ -177,7 +161,7 @@ public class AIBoard extends Board {
 
     /**
      *  Переопределнный метод родителя.
-     *  В переопределении метода добавлена отмена хода
+     *  В переопределении метода убрано запоминание последнего хода
      *
      * @param x         координата хода по горизонтали
      * @param y         координата хода по вертикали
@@ -189,18 +173,16 @@ public class AIBoard extends Board {
      */
     @Override
     public boolean makeTurn(int x, int y, byte player) {
-        if (isEmptyCell(x, y) || player == EMPTY_SEED_I) {
+        if (isEmptyCell(x, y)) {
             field[y][x] = player;
-            if (player == EMPTY_SEED_I) {
-                ++turnsCounter;             // если отмена хода, число возможных ходов увеличивается на 1
-            } else {
-                lastTurn[0] = x;
-                lastTurn[1] = y;
-                --turnsCounter;             // уменьшение числа возможных ходов
-                winnerIndex = getWinner(x, y,  player);
-            }
+            --turnsCounter;             // уменьшение числа возможных ходов
+            winnerIndex = getWinner(x, y, player);
             return true;
         } else
             return false;
+    }
+
+    public void undoTurn(int x, int y) {
+        field[y][x] = EMPTY_SEED_I;
     }
 }

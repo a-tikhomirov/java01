@@ -23,8 +23,8 @@ public class AIPlayer {
      * @param ai_seed       индекс ИИ для игры
      * @param human_seed    индекс игрока
      */
-    public AIPlayer(byte ai_seed, byte human_seed) {
-        this(ai_seed, human_seed, DEF_DIF);
+    public AIPlayer(Board board, byte ai_seed, byte human_seed) {
+        this(board, ai_seed, human_seed, DEF_DIF);
     }
 
     /**
@@ -34,7 +34,8 @@ public class AIPlayer {
      * @param difficulty    сложность ИИ, принимает значения
      *                      от <code>AIPlayer.MIN_DIF</code> до <code>AIPlayer.MAX_DIF</code>
      */
-    public AIPlayer(byte ai_seed, byte human_seed, int difficulty) {
+    public AIPlayer(Board board, byte ai_seed, byte human_seed, int difficulty) {
+        aiBoard = new AIBoard(board, ai_seed, human_seed);
         this.ai_seed = ai_seed;
         this.human_seed = human_seed;
         this.difficulty = difficulty;
@@ -62,10 +63,8 @@ public class AIPlayer {
         if (difficulty == MIN_DIF) {
             move = randomTurn(board);
         } else {
-            aiBoard = new AIBoard(board, ai_seed, human_seed);
+            aiBoard.copyData(board, board.getField());
             move = minimax(DIFF[difficulty], ai_seed, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            //aiBoard = null;   // приводит к видимому увеличению времени работы метода
-            //System.gc();      // приводит к видимому увеличению времени работы метода
         }
 //        float deltaTime = (System.nanoTime() - startTime) * 0.000000001f;
 //        System.out.printf("time: %f\n", deltaTime);
@@ -148,7 +147,7 @@ public class AIPlayer {
                     }
                 }
                 // отмена очередного провернного ход, для экперимента со следующим из списка возможных ходов
-                aiBoard.makeTurn(move[0], move[1], aiBoard.EMPTY_SEED_I);
+                aiBoard.undoTurn(move[0], move[1]);
                 // если лучший показатель веса ситуации на доске для ИИ превышает или равен таковому для игрока
                 // то расчет этой ветви прекращается (т.к. получается что эта ветвь потенциально лучше для ИИ, а игрок
                 // не будет давать возможность такую ветвь выбрать, т.е. будет мешать наилучгим ходам ИИ и выбирать лучшие для себя)

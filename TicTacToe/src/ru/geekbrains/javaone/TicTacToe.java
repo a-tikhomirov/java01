@@ -111,11 +111,11 @@ public class TicTacToe {
                     AIPlayer.MIN_DIF, AIPlayer.MAX_DIF, PROMPT, AIPlayer.DEF_DIF);
             difficulty = parseToInt(SCANNER.nextLine());
             if (difficulty == -1) {
-                ai = new AIPlayer(aiIndex, humanIndex);
+                ai = new AIPlayer(gameBoard, aiIndex, humanIndex);
                 return;
             }
         } while (!AIPlayer.isValidDifficluty(difficulty));
-        ai = new AIPlayer(aiIndex, humanIndex, difficulty);
+        ai = new AIPlayer(gameBoard, aiIndex, humanIndex, difficulty);
     }
 
     /**
