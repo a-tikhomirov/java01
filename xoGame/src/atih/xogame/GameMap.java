@@ -117,6 +117,7 @@ public class GameMap extends JPanel {
     public void startGame() {
         setGraphic();
         setParams();
+        if (mode == GM_HVA && !isHumanTurn) nextTurn(0,0);
         gameWindow.updateGameInfo(players[currentSeed]);
     }
 
@@ -141,6 +142,9 @@ public class GameMap extends JPanel {
                     if (checkGameOver()) return false;
                     currentSeed = (currentSeed == 0) ? 1 : 0;
                     lastSeed = currentSeed;
+                    result = aiTurn(ai1Player, seeds[currentSeed]);
+                    isHumanTurn = true;
+                } else {
                     result = aiTurn(ai1Player, seeds[currentSeed]);
                     isHumanTurn = true;
                 }
@@ -213,23 +217,21 @@ public class GameMap extends JPanel {
      */
     private void setParams() {
         gameBoard = new Board(fieldSizeX, fieldSizeY, winLength);
+        seeds = new byte[] {Board.P1_SEED_I, Board.P2_SEED_I};
         if (mode == GM_HVA) {
             if (turnsOrder == STRAIGTH_ORDER) {
-                seeds = new byte[] {Board.P1_SEED_I, Board.P2_SEED_I};
                 players = new String[] {PLAYERS[mode][STRAIGTH_ORDER], PLAYERS[mode][REVERSE_ORDER]};
                 isHumanTurn = true;
+                ai1Player = new AiPlayer(gameBoard, seeds[1], seeds[0], ai1Difficulty);
             } else if (turnsOrder == REVERSE_ORDER) {
-                seeds = new byte[] {Board.P2_SEED_I, Board.P1_SEED_I};
                 players = new String[] {PLAYERS[mode][REVERSE_ORDER], PLAYERS[mode][STRAIGTH_ORDER]};
                 isHumanTurn = false;
+                ai1Player = new AiPlayer(gameBoard, seeds[0], seeds[1], ai1Difficulty);
             }
-            ai1Player = new AiPlayer(gameBoard, seeds[1], seeds[0], ai1Difficulty);
         } else if (mode == GM_HVH) {
-            seeds = new byte[] {Board.P1_SEED_I, Board.P2_SEED_I};
             players = new String[] {PLAYERS[mode][STRAIGTH_ORDER], PLAYERS[mode][REVERSE_ORDER]};
             isHumanTurn = true;
         } else if (mode == GM_AVA) {
-            seeds = new byte[] {Board.P1_SEED_I, Board.P2_SEED_I};
             players = new String[] {PLAYERS[mode][STRAIGTH_ORDER], PLAYERS[mode][REVERSE_ORDER]};
             ai1Player = new AiPlayer(gameBoard, seeds[0], seeds[1], ai1Difficulty);
             ai2Player = new AiPlayer(gameBoard, seeds[1], seeds[0], ai2Difficulty);
