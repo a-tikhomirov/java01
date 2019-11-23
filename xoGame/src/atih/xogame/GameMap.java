@@ -98,17 +98,21 @@ public class GameMap extends JPanel {
             if (checkGameOver()) {
                 return;
             }
-            updateGameInfo();
+            updateGameInfo(true, true);
             repaint();
         }
     }
 
-    private void updateGameInfo() {
-        String lastTurn = String.format("Last turn: %s at %d, %d",
-                players[lastSeed], gameBoard.getLastTurn()[0] + 1, gameBoard.getLastTurn()[1] + 1);
-        String gameInfo = String.format("Current turn: %s, click", players[currentSeed]);
-        gameWindow.updateLastTurn(lastTurn);
-        gameWindow.updateGameInfo(gameInfo);
+    private void updateGameInfo(boolean turn, boolean info) {
+        if (turn) {
+            String lastTurn = String.format("Last turn: %s at %d, %d",
+                    players[lastSeed], gameBoard.getLastTurn()[0] + 1, gameBoard.getLastTurn()[1] + 1);
+            gameWindow.updateLastTurn(lastTurn);
+        }
+        if (info) {
+            String gameInfo = String.format("Current turn: %s, click", players[currentSeed]);
+            gameWindow.updateGameInfo(gameInfo);
+        }
     }
 
     /**
@@ -117,8 +121,11 @@ public class GameMap extends JPanel {
     public void startGame() {
         setGraphic();
         setParams();
-        if (mode == GM_HVA && !isHumanTurn) nextTurn(0,0);
-        gameWindow.updateGameInfo(players[currentSeed]);
+        if (mode == GM_HVA && !isHumanTurn) {
+            nextTurn(0,0);
+            updateGameInfo(true, true);
+        }
+        updateGameInfo(false, true);
     }
 
     /**
