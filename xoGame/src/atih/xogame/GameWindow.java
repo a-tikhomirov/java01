@@ -8,8 +8,8 @@ import java.awt.event.ActionListener;
 public class GameWindow extends JFrame {
     private final int WIDTH = 614;
     private final int HEIGTH = 688;
-    public final int W_DELTA = 14;
-    public final int H_DELTA = 88;
+    public final int W_DELTA = 24;
+    public final int H_DELTA = 96;
 
     private JLabel lblLastTurn;
     private JLabel lblGameInfo;             // для отображения информации об игре
@@ -127,11 +127,13 @@ public class GameWindow extends JFrame {
 
     private void btnRestartClick() {
         switchControls(gameMap, btnStart, false);
+        resetInfo();
         gameMap.stopGame();
     }
 
     private void btnStartClick() {
         switchControls(btnStart, gameMap, true);
+        resetInfo();
         gameMap.startGame();
     }
 
@@ -157,6 +159,19 @@ public class GameWindow extends JFrame {
     public void reSize(int sizeX, int sizeY) {
         setSize(sizeX, sizeY);
         repaint();
+    }
+
+    public void updateLastTurn(String text) {
+        lblLastTurn.setText(text);
+    }
+
+    public void updateGameInfo(String text) {
+        lblGameInfo.setText(text);
+    }
+
+    public void resetInfo() {
+        lblLastTurn.setText("");
+        lblGameInfo.setText("");
     }
 
     /**

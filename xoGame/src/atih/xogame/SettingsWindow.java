@@ -296,7 +296,6 @@ public class SettingsWindow extends JFrame {
             aiDifficulty = sldAiDifficulty.getValue();
             ai2Difficulty = -1;
             turnsOrder = sldTurnsOrder.getValue();
-
         } else if (gameMode == GameMap.GM_HVH) {
             aiDifficulty = -1;
             ai2Difficulty = -1;

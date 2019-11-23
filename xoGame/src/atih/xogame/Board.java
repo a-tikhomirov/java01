@@ -84,7 +84,7 @@ public class Board {
         this.seedsToWin = seedsToWin;
         turnsCounter = fieldSizeX * fieldSizeY;
         winnerIndex = -1;
-        lastTurn = new int[2];
+        lastTurn = new int[] {fieldSizeX/2, fieldSizeY/2};
         initField();
         initWinMap();
     }
@@ -167,51 +167,6 @@ public class Board {
     }
 
     public boolean isSeed(int x, int y, byte seed) {return field[y][x] == seed; }
-
-    /**
-     * Возвращает текущее состояние игрового поля в удобном
-     * для отображения виде
-     * @return  отформатированное содержимое игрового
-     *          поля <code>field[][]</code>
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("  \t");
-        for (int i = 1; i <= fieldSizeX; ++i) sb.append(" " + i);
-        sb.append("\n");
-        for (int i = 0; i < fieldSizeY; ++i) {
-            sb.append((i + 1) + "\t|");
-            for (int j = 0; j < fieldSizeX; ++j) {
-                sb.append(P_SEED[field[i][j]] + "|");
-            }
-            sb.append("\n");
-        }
-        sb.append("---");
-        for (int i = 1; i <= fieldSizeX; ++i) sb.append("--");
-        return sb.toString();
-    }
-
-    /**
-     * Возвращает текущее состояние игрового поля в удоном
-     * для отображения виде. Добавлена табуляция и отступы между строками
-     * @return  отформатированное содержимое игрового
-     *          поля <code>field[][]</code>
-     */
-    public String toStringBS() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("  ");
-        for (int i = 1; i <= fieldSizeX; ++i) sb.append("\t" + i);
-        sb.append("\n");
-        for (int i = 0; i < fieldSizeY; ++i) {
-            sb.append(i + 1);
-            for (int j = 0; j < fieldSizeX; ++j) {
-                sb.append("\t" + P_SEED[field[i][j]]);
-            }
-            sb.append("\n\n");
-        }
-        return sb.toString();
-    }
 
     public byte getWinner(int x, int y, byte player) {
         for (int i = 0; i < DIRS.length; ++i) {

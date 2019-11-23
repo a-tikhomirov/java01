@@ -11,7 +11,6 @@ public class AiBoard extends Board {
     private int seedsToWin;     // число символов подряд для выигрыша
     private int turnsCounter;   // число возможных ходов
     private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
-    private int[] lastTurn;     // хранит последний сделанный ход
 
     private byte ai_seed;       // индекс ИИ - используется для подсчета веса хода
     private byte human_seed;    // индекс игрока - используется для подсчета веса хода
@@ -64,8 +63,22 @@ public class AiBoard extends Board {
     private void initKoefficients() {
         koeff = new int[seedsToWin];
         for (int i = seedsToWin - 1; i >= 0; --i) {
-            koeff[i] = (int) Math.pow(10, i + 1);
+            koeff[i] = (int) Math.pow(10, i);
         }
+        koeff[seedsToWin - 1] *= 10;
+    }
+
+    public int[] isAboutToWin(byte seed) {
+        List<int[]> nextMoves = getPossibleTurns();
+        for (int[] move : nextMoves) {
+            makeTurn(move[0], move[1], seed);
+            if (winnerIndex == seed) {
+                undoTurn(move[0], move[1]);
+                return new int[] {move[0], move[1]};
+            }
+            undoTurn(move[0], move[1]);
+        }
+        return new int[] {-1, -1};
     }
 
     /**
@@ -82,6 +95,7 @@ public class AiBoard extends Board {
      */
     public List<int[]> getPossibleTurns() {
         if (winnerIndex != -1 || turnsCounter == 0) return null;
+        //int[][] possibleMoves = new int[][2];
         List<int[]> possibleMoves = new ArrayList<int[]>();
         for (int i = 0; i < fieldSizeY; ++i) {
             for (int j = 0; j < fieldSizeX; ++j) {
@@ -118,21 +132,21 @@ public class AiBoard extends Board {
      * @param y         координата начала отрезка по вертикали
      * @param dirX      множитель смещения отрезка по горизонтали
      * @param dirY      множитель смещения отрезка по вертикали
-     * @param lienLen   длина отрезка
+     * @param lineLen   длина отрезка
      * @param seed      индекс игрока для расчета веса комбинации
      * @param oppSeed   индекс противополжного игрока для прекращения расчета,
      *                  т.к. наличие на отрезке хода противоположного игрока значит что
      *                  эта комбинация бесперспективна (не приведет к выигрышу)
      * @return          знаенчие веса комбинации заданного отрезка для заданного игрока
      */
-    private int getLineScore(int x, int y, int dirX, int dirY, int lienLen, byte seed, byte oppSeed) {
-        int lengthX = x + (lienLen - 1) * dirX;
-        int lengthY = y + (lienLen - 1) * dirY;
+    private int getLineScore(int x, int y, int dirX, int dirY, int lineLen, byte seed, byte oppSeed) {
+        int lengthX = x + (lineLen - 1) * dirX;
+        int lengthY = y + (lineLen - 1) * dirY;
         if (!isValidCoords(lengthX, lengthY)) {
             return 0;
         }
         int score = 0;
-        for (int i = 0; i < lienLen; ++i) {
+        for (int i = 0; i < lineLen; ++i) {
             if (field[y + i * dirY][x + i * dirX] == seed) ++score;
             if (field[y + i * dirY][x + i * dirX] == oppSeed) {
                 score = 0;
@@ -183,6 +197,7 @@ public class AiBoard extends Board {
 
     public void undoTurn(int x, int y) {
         winnerIndex = -1;
+        ++turnsCounter;
         field[y][x] = EMPTY_SEED_I;
     }
 }
