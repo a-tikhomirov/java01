@@ -6,19 +6,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class GameWindow extends JFrame {
-    private JLabel lblGameInfo = new JLabel(" ");      // для отображения информации об игре
-    private JButton btnStart = new JButton("Start");   // кнопка старт
-    private JButton btnExit = new JButton("Exit");     // кнопка выход
+    private final int WIDTH = 614;
+    private final int HEIGTH = 688;
+    public final int W_DELTA = 14;
+    public final int H_DELTA = 88;
 
-    private GameMap gameMap;                                // поле для игры крестики-нолики
-    private SettingsWindow settingsWindow;                  // окно выбора параметров игры
+    private JLabel lblLastTurn;
+    private JLabel lblGameInfo;             // для отображения информации об игре
+    private JButton btnRestart;
+    private JButton btnStart;
+    private JButton btnSettings;            // кнопка старт
+    private JButton btnExit;                // кнопка выход
 
-    private int originalWidth;                              // первоначальная ширина окна
-    private int originalHeight;                             // первоначальная высота окна
+    private GameMap gameMap;                // поле для игры крестики-нолики
+    private SettingsWindow settingsWindow;  // окно выбора параметров игры
 
     GameWindow() {
         setWindowParams();
         setPosition();
+        makeElements();
         addElements();
         addControls();
         setVisible(true);
@@ -37,7 +43,7 @@ public class GameWindow extends JFrame {
         setResizable(false);
 
         // задаем отступы от границ окна внутрь окна
-        getRootPane().setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        getRootPane().setBorder(BorderFactory.createEmptyBorder(4, 4, 3, 4));
     }
 
     /**
@@ -46,10 +52,17 @@ public class GameWindow extends JFrame {
     private void setPosition() {
         // получаем размеры экрана
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        originalWidth = (int) screenSize.getWidth() / 4;    // ширина - четверть ширины экрана
-        originalHeight = (int) screenSize.getHeight() / 2;  // высота - половина высоты экрана
         // устанавливаем положение (посередине экрана) и размеры окна
-        setBounds((int)(screenSize.getWidth() / 2 - originalWidth / 2), (int)(screenSize.getHeight() / 2 - originalHeight / 2), originalWidth, originalHeight);
+        setBounds((int)(screenSize.getWidth() / 2 - WIDTH / 2), (int)(screenSize.getHeight() / 2 - HEIGTH / 2), WIDTH, HEIGTH);
+    }
+
+    private void makeElements() {
+        lblLastTurn = new JLabel(" ");
+        lblGameInfo = new JLabel(" ");
+        btnRestart = new JButton("Abort");
+        btnStart = new JButton("Start");
+        btnSettings = new JButton("Setting");
+        btnExit = new JButton("Exit");
     }
 
     /**
@@ -57,9 +70,12 @@ public class GameWindow extends JFrame {
      */
     private void addElements() {
         // создаем верхнюю панель
-        JPanel pnlTop = new JPanel(new GridLayout(1, 1, 4, 4));
+        JPanel pnlTop = new JPanel(new GridLayout(1, 3, 1, 0));
         // добавляем на верхнюю панель JLabel "информация об игре"
+        pnlTop.add(lblLastTurn);
         pnlTop.add(lblGameInfo);
+        pnlTop.add(btnRestart);
+        btnRestart.setEnabled(false);
 
         // создаем экземпляр поля для игры
         gameMap = new GameMap(this);
@@ -70,11 +86,11 @@ public class GameWindow extends JFrame {
         // создаем нижнюю панль
         JPanel pnlBottom = new JPanel(new GridLayout(1, 2, 4, 4));
         // добавляем на нижнюю панель кнопки
-        pnlBottom.add(btnStart);
+        pnlBottom.add(btnSettings);
         pnlBottom.add(btnExit);
 
         add(pnlTop, BorderLayout.NORTH);    // добавляем верхнюю панель в верхнюю часть окна
-        add(gameMap, BorderLayout.CENTER);  // добавляем поле для игры в центр окна
+        add(btnStart, BorderLayout.CENTER);
         add(pnlBottom, BorderLayout.SOUTH); // добавляем нижнюю панель в нижнюю часть окна
     }
 
@@ -82,10 +98,22 @@ public class GameWindow extends JFrame {
      * Добавление действий для элементов окна (кнопок)
      */
     private void addControls() {
+        btnRestart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnRestartClick();
+            }
+        });
         btnStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 btnStartClick();
+            }
+        });
+        btnSettings.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnSettingsClick();
             }
         });
 
@@ -97,10 +125,20 @@ public class GameWindow extends JFrame {
         });
     }
 
+    private void btnRestartClick() {
+        switchControls(gameMap, btnStart, false);
+        gameMap.stopGame();
+    }
+
+    private void btnStartClick() {
+        switchControls(btnStart, gameMap, true);
+        gameMap.startGame();
+    }
+
     /**
      * Вызывается при нажатии на кнопку <code>btnStart</>
      */
-    private void btnStartClick() {
+    private void btnSettingsClick() {
         settingsWindow.setVisible(true);
     }
 
@@ -113,12 +151,12 @@ public class GameWindow extends JFrame {
 
     /**
      * Изменение размеров окна
-     * @param deltaX    изменение размера по горизонтали
-     * @param deltaY    изменение размера по вертикали
+     * @param sizeX    размер по горизонтали
+     * @param sizeY    размер по вертикали
      */
-    public void reSize(int deltaX, int deltaY) {
-
-        setSize(originalWidth + deltaX, originalHeight + deltaY);
+    public void reSize(int sizeX, int sizeY) {
+        setSize(sizeX, sizeY);
+        repaint();
     }
 
     /**
@@ -127,9 +165,20 @@ public class GameWindow extends JFrame {
      * @param fieldSizeX    число ячеек по горизонтали
      * @param fieldSizeY    число ячеек по вертикали
      * @param winLength     число символов подряд для выигрыша
-     * @param difficulty    сложность игры против ИИ
+     * @param ai1Difficulty сложность игры ИИ 1
+     * @param ai2Difficulty сложность игры ИИ 2
+     * @param turnsOrder    порядок ходов
      */
-    public void startNewGame(int mode, int fieldSizeX, int fieldSizeY, int winLength, int difficulty) {
-        gameMap.startNewGame(mode, fieldSizeX, fieldSizeY, winLength, difficulty);
+    public void applySettings(int mode, int fieldSizeX, int fieldSizeY, int winLength, int ai1Difficulty, int ai2Difficulty, int turnsOrder) {
+        gameMap.applySettings(mode, fieldSizeX, fieldSizeY, winLength, ai1Difficulty, ai2Difficulty, turnsOrder);
+        switchControls(gameMap, btnStart, false);
+    }
+
+    private void switchControls(Component toRemove, Component toAdd, boolean restartEnabled) {
+        getContentPane().remove(toRemove);
+        add(toAdd, BorderLayout.CENTER);
+        btnRestart.setEnabled(restartEnabled);
+        revalidate();
+        repaint();
     }
 }
