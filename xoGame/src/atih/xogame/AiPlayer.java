@@ -5,7 +5,7 @@ import java.util.List;      // для возможности использов�
 
 public class AiPlayer {
     private static final Random RANDOM = new Random();  // используется для генерации псевдослучайных значений
-    private static final int[] DIFF = {0, 1, 2};  // массив обозначающий сложность алг-ма выбора оптимального хода
+    private static final int[] DIFF = {0, 1, 2, 4};  // массив обозначающий сложность алг-ма выбора оптимального хода
 
     public static final int MIN_DIF = 0;                // минимальная сложность ИИ
     public static final int MED_DIF = 1;
@@ -62,6 +62,8 @@ public class AiPlayer {
             move = randomTurn(board);
         } else  {
             aiBoard.copyData(board, board.getField());
+            move = aiBoard.isAboutToWin(mySeed);
+            if (move[0] != -1) return move;
             move = minimax(DIFF[difficulty], mySeed, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
 //        float deltaTime = (System.nanoTime() - startTime) * 0.000000001f;
@@ -109,7 +111,7 @@ public class AiPlayer {
      */
     private int[] minimax(int depth, byte seed, int alpha, int beta) {
         // получение списка возможных ходов в окрестностях последнего хода
-        List<int[]> nextMoves = aiBoard.getPossibleTurns();
+        List<int[]> nextMoves = aiBoard.getPossibleTurns(false);
 
         int score;          // переменная для хранения рассчитанного значения веса
         int bestCol = -1;   // переменная для хранения лучшей координаты по x

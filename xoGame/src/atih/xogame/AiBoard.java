@@ -11,6 +11,7 @@ public class AiBoard extends Board {
     private int seedsToWin;     // число символов подряд для выигрыша
     private int turnsCounter;   // число возможных ходов
     private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
+    private int[] lastTurn;
 
     private byte ai_seed;       // индекс ИИ - используется для подсчета веса хода
     private byte human_seed;    // индекс игрока - используется для подсчета веса хода
@@ -33,6 +34,7 @@ public class AiBoard extends Board {
         field = super.getField();
         seedsToWin = super.getSeedsToWin();
         winnerIndex = -1;
+        lastTurn = new int[2];
         this.ai_seed = ai_seed;
         this.human_seed = human_seed;
         initKoefficients();
@@ -46,6 +48,8 @@ public class AiBoard extends Board {
      */
     public void copyData(Board board, byte[][] field) {
         turnsCounter = board.getTurnsCounter();
+        lastTurn[LT_X] = board.getLastTurn()[LT_X];
+        lastTurn[LT_Y] = board.getLastTurn()[LT_Y];
         for (int i = 0; i < fieldSizeY; ++i){
             for (int j = 0; j < fieldSizeX; ++j) {
                 this.field[i][j] = field[i][j];
@@ -65,11 +69,10 @@ public class AiBoard extends Board {
         for (int i = seedsToWin - 1; i >= 0; --i) {
             koeff[i] = (int) Math.pow(10, i);
         }
-        koeff[seedsToWin - 1] *= 10;
     }
 
     public int[] isAboutToWin(byte seed) {
-        List<int[]> nextMoves = getPossibleTurns();
+        List<int[]> nextMoves = getPossibleTurns(true);
         for (int[] move : nextMoves) {
             makeTurn(move[0], move[1], seed);
             if (winnerIndex == seed) {
@@ -93,12 +96,27 @@ public class AiBoard extends Board {
      * <code>x + seedsToWin - 1</code> и <code>y + seedsToWin - 1</code>
      * @return  возвращает <code>List<int[2]></code> лист массивов возможных ходов
      */
-    public List<int[]> getPossibleTurns() {
+    public List<int[]> getPossibleTurns(boolean checkAllField) {
         if (winnerIndex != -1 || turnsCounter == 0) return null;
+        if (checkAllField) return getAreaMoves(0, 0, fieldSizeX - 1, fieldSizeY - 1);
         //int[][] possibleMoves = new int[][2];
+        int xStart = (lastTurn[LT_X] - seedsToWin + 1 > 0) ?
+                lastTurn[LT_X] - seedsToWin + 1 : 0;
+        int yStart = (lastTurn[LT_Y] - seedsToWin + 1 > 0) ?
+                lastTurn[LT_Y] - seedsToWin + 1 : 0;
+        int xEnd = (lastTurn[LT_X] + seedsToWin < fieldSizeX) ?
+                lastTurn[LT_X] + seedsToWin - 1 : fieldSizeX - 1;
+        int yEnd = (lastTurn[LT_Y] + seedsToWin < fieldSizeY) ?
+                lastTurn[LT_Y] + seedsToWin - 1 : fieldSizeY - 1;
+        List<int[]> possibleMoves = getAreaMoves(xStart, yStart, xEnd, yEnd);
+        return possibleMoves.isEmpty() ?
+                getAreaMoves(0, 0, fieldSizeX - 1, fieldSizeY - 1) : possibleMoves;
+    }
+
+    private List<int[]> getAreaMoves(int xStart, int yStart, int xEnd, int yEnd) {
         List<int[]> possibleMoves = new ArrayList<int[]>();
-        for (int i = 0; i < fieldSizeY; ++i) {
-            for (int j = 0; j < fieldSizeX; ++j) {
+        for (int i = yStart; i <= yEnd; ++i) {
+            for (int j = xStart; j <= xEnd; ++j) {
                 if (field[i][j] == EMPTY_SEED_I) {
                     possibleMoves.add(new int[] {j, i});
                 }

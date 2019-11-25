@@ -93,7 +93,8 @@ public class GameMap extends JPanel {
         if (gameState == STATE_STARTED) {
             int x = e.getX() / cellSize;
             int y = e.getY() / cellSize;
-            if (!nextTurn(x ,y)) return;
+            if (!nextTurn(x ,y))
+                return;
             //if (mode == GM_HVA) isHumanTurn = !isHumanTurn;
             if (checkGameOver()) {
                 return;
@@ -146,6 +147,7 @@ public class GameMap extends JPanel {
             case GM_HVA:
                 if (isHumanTurn) {
                     if (!gameBoard.makeTurn(x, y, seeds[currentSeed])) return false;
+                    repaint();
                     if (checkGameOver()) return false;
                     currentSeed = (currentSeed == 0) ? 1 : 0;
                     lastSeed = currentSeed;

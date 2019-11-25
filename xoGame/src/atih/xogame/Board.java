@@ -2,7 +2,7 @@ package atih.xogame;
 
 public class Board {
     public static final int MIN_SIZE = 3;          // минимальный замер поля по горизонтали/вертикали
-    public static final int MAX_SIZE = 15;
+    public static final int MAX_SIZE = 10;
     public static final char[] P_SEED = {'X', '0', '.'};   // символы для отображения на поле ходя 1, 2 игрока и пустой клетки
     public static final byte P1_SEED_I = 0;         // индекс символа 1 игрока массива P_SEED
     public static final byte P2_SEED_I = 1;         // индекс символа 2 игрока массива P_SEED
@@ -15,8 +15,8 @@ public class Board {
     private int turnsCounter;   // число возможных ходов
     private byte winnerIndex;   // 0 - победил первый игрок, 1 - победил второй игрок, -1 - никто не победил
     private int[] lastTurn;     // хранит последний сделанный ход
-    private final int LT_X = 0;
-    private final int LT_Y = 1;
+    public final int LT_X = 0;
+    public final int LT_Y = 1;
 
     private int[][][][] winMap; // массив используемый для проверки выигрыша
     private final int W_POS_COMBOS = 0;
